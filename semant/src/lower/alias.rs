@@ -19,7 +19,7 @@ where
     pub fn finish(self, name: hir::Name, span: hir::Span, ty: hir::TypeId) -> hir::TypeAlias {
         let type_params = self.type_params;
         hir::TypeAlias {
-            name,
+            name: self.db.intern_name(name),
             type_params,
             span,
             ty,
