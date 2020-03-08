@@ -59,18 +59,6 @@ impl Reporter {
         self.diagnostics.borrow_mut().push(diagnostic)
     }
 
-    pub fn emit(&self, files: &Files<Arc<str>>) -> io::Result<()> {
-        let writer = StandardStream::stderr(ColorChoice::Auto);
-        let mut writer = writer.lock();
-        let config = Config::default();
-
-        while let Some(diagnostic) = self.diagnostics.borrow_mut().pop() {
-            emit(&mut writer, &config, files, &diagnostic)?
-        }
-
-        Ok(())
-    }
-
     pub fn has_errors(&self) -> bool {
         !self.diagnostics.borrow().is_empty()
     }
