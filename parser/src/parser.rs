@@ -3,6 +3,7 @@ mod enums;
 mod expressions;
 mod function;
 mod imports;
+mod module;
 mod params;
 mod pattern;
 mod pratt;

@@ -82,8 +82,9 @@ pub enum SyntaxKind {
     EXPORT_KW, // export 58
     IMPORT_KW, // import 59
     FROM_KW, // from 60
-    NIL_KW, // nil 61
-    SELF_KW, // self 62
+    MOD_KW, // mod 61
+    NIL_KW, // nil 62
+    SELF_KW, // self 63
     INT_NUMBER, // 63
     FLOAT_NUMBER, // 64
     CHAR, // 65
@@ -98,65 +99,66 @@ pub enum SyntaxKind {
     ENUM_DEF, // 74
     FN_DEF, // 75
     IMPORT_DEF, // 76
-    TYPE_ALIAS_DEF, // 77
-    IMPORT_SEGMENT, // 78
-    BIND_PAT, // 79
-    PLACEHOLDER_PAT, // 80
-    TUPLE_PAT, // 81
-    LITERAL_PAT, // 82
-    TYPE_REF, // 83
-    FN_TYPE, // 84
-    PAREN_TYPE, // 85
-    ARRAY_TYPE, // 86
-    IDENT_TYPE, // 87
-    RET_TYPE, // 88
-    ARRAY_EXPR, // 89
-    CALL_EXPR, // 90
-    CAST_EXPR, // 91
-    INDEX_EXPR, // 92
-    FIELD_EXPR, // 93
-    BIN_EXPR, // 94
-    PREFIX_EXPR, // 95
-    TUPLE_EXPR, // 96
-    IDENT_EXPR, // 97
-    IF_EXPR, // 98
-    WHILE_EXPR, // 99
-    CONDITION, // 100
-    LOOP_EXPR, // 101
-    DO_EXPR, // 102
-    FOR_EXPR, // 103
-    CONTINUE_EXPR, // 104
-    BREAK_EXPR, // 105
-    BLOCK_EXPR, // 106
-    RETURN_EXPR, // 107
-    CLOSURE_EXPR, // 108
-    PAREN_EXPR, // 109
-    MATCH_EXPR, // 110
-    MATCH_ARM_LIST, // 111
-    MATCH_ARM, // 112
-    MATCH_GUARD, // 113
-    CLASS_LIT, // 114
-    NAMED_FIELD_LIST, // 115
-    NAMED_FIELD, // 116
-    ENUM_VARIANT, // 117
-    NAMED_FIELD_DEF_LIST, // 118
-    NAMED_FIELD_DEF, // 119
-    RECORD_LITERAL_FIELD_LIST, // 120
-    RECORD_LITERAL_FIELD, // 121
-    RECORD_LITERAL_EXPR, // 122
-    ENUM_VARIANT_LIST, // 123
-    VISIBILITY, // 124
-    LITERAL, // 125
-    NAME, // 126
-    NAME_REF, // 127
-    LET_STMT, // 128
-    EXPR_STMT, // 129
-    TYPE_PARAM_LIST, // 130
-    TYPE_PARAM, // 131
-    PARAM_LIST, // 132
-    PARAM, // 133
-    SELF_PARAM, // 134
-    ARG_LIST, // 135
+    MOD_DEF, // 77
+    TYPE_ALIAS_DEF, // 78
+    IMPORT_SEGMENT, // 79
+    BIND_PAT, // 80
+    PLACEHOLDER_PAT, // 81
+    TUPLE_PAT, // 82
+    LITERAL_PAT, // 83
+    TYPE_REF, // 84
+    FN_TYPE, // 85
+    PAREN_TYPE, // 86
+    ARRAY_TYPE, // 87
+    IDENT_TYPE, // 88
+    RET_TYPE, // 89
+    ARRAY_EXPR, // 90
+    CALL_EXPR, // 91
+    CAST_EXPR, // 92
+    INDEX_EXPR, // 93
+    FIELD_EXPR, // 94
+    BIN_EXPR, // 95
+    PREFIX_EXPR, // 96
+    TUPLE_EXPR, // 97
+    IDENT_EXPR, // 98
+    IF_EXPR, // 99
+    WHILE_EXPR, // 100
+    CONDITION, // 101
+    LOOP_EXPR, // 102
+    DO_EXPR, // 103
+    FOR_EXPR, // 104
+    CONTINUE_EXPR, // 105
+    BREAK_EXPR, // 106
+    BLOCK_EXPR, // 107
+    RETURN_EXPR, // 108
+    CLOSURE_EXPR, // 109
+    PAREN_EXPR, // 110
+    MATCH_EXPR, // 111
+    MATCH_ARM_LIST, // 112
+    MATCH_ARM, // 113
+    MATCH_GUARD, // 114
+    CLASS_LIT, // 115
+    NAMED_FIELD_LIST, // 116
+    NAMED_FIELD, // 117
+    ENUM_VARIANT, // 118
+    NAMED_FIELD_DEF_LIST, // 119
+    NAMED_FIELD_DEF, // 120
+    RECORD_LITERAL_FIELD_LIST, // 121
+    RECORD_LITERAL_FIELD, // 122
+    RECORD_LITERAL_EXPR, // 123
+    ENUM_VARIANT_LIST, // 124
+    VISIBILITY, // 125
+    LITERAL, // 126
+    NAME, // 127
+    NAME_REF, // 128
+    LET_STMT, // 129
+    EXPR_STMT, // 130
+    TYPE_PARAM_LIST, // 131
+    TYPE_PARAM, // 132
+    PARAM_LIST, // 133
+    PARAM, // 134
+    SELF_PARAM, // 135
+    ARG_LIST, // 136
     // Technical kind so that we can cast from u16 safely
     #[doc(hidden)]
     __LAST,
@@ -235,6 +237,7 @@ impl SyntaxKind {
             EXPORT_KW => "export",
             IMPORT_KW => "import",
             FROM_KW => "from",
+            MOD_KW => "mod",
             NIL_KW => "nil",
             SELF_KW => "self",
             INT_NUMBER => "INT_NUMBER",
@@ -251,6 +254,7 @@ impl SyntaxKind {
             ENUM_DEF => "ENUM_DEF",
             FN_DEF => "FN_DEF",
             IMPORT_DEF => "IMPORT_DEF",
+            MOD_DEF => "MOD_DEF",
             TYPE_ALIAS_DEF => "TYPE_ALIAS_DEF",
             IMPORT_SEGMENT => "IMPORT_SEGMENT",
             BIND_PAT => "BIND_PAT",
@@ -1462,6 +1466,30 @@ impl MatchExpr {
     }
 }
 
+// ModDef
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ModDef {
+    pub(crate) syntax: SyntaxNode,
+}
+
+impl AstNode for ModDef {
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            MOD_DEF => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) { Some(ModDef { syntax }) } else { None }
+    }
+    fn syntax(&self) -> &SyntaxNode { &self.syntax }
+}
+
+
+impl traits::NameOwner for ModDef {}
+impl ModDef {}
+
 // Name
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -1945,6 +1973,7 @@ impl traits::FnDefOwner for SourceFile {}
 impl traits::TypeAliasDefOwner for SourceFile {}
 impl traits::EnumDefOwner for SourceFile {}
 impl traits::ExternImportDefOwner for SourceFile {}
+impl traits::ModuleDefOwner for SourceFile {}
 impl SourceFile {}
 
 // Stmt

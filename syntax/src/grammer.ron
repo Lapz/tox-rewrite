@@ -67,6 +67,7 @@ Grammar(
         "export",
         "import",
         "from",
+        "mod",
         "nil",
         "self",
     ],
@@ -90,6 +91,7 @@ Grammar(
         "ENUM_DEF",
         "FN_DEF",
         "IMPORT_DEF",
+        "MOD_DEF",
         "TYPE_ALIAS_DEF",
         "IMPORT_SEGMENT",
         //patterns
@@ -163,7 +165,7 @@ Grammar(
     ],
     ast: {
         "SourceFile": (
-            traits: ["ClassDefOwner","FnDefOwner","TypeAliasDefOwner","EnumDefOwner","ExternImportDefOwner"]
+            traits: ["ClassDefOwner","FnDefOwner","TypeAliasDefOwner","EnumDefOwner","ExternImportDefOwner","ModuleDefOwner"]
         ),
         "FnDef":(
             traits: [
@@ -200,6 +202,11 @@ Grammar(
         ),
         "ImportDef":(
             options: [["imports","Name"]]
+        ),
+        "ModDef":(
+            traits: [
+                "NameOwner",
+            ]
         ),
         "EnumDef":(
              traits: [
