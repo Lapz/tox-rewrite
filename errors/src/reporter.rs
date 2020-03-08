@@ -1,15 +1,9 @@
-use codespan::{FileId, Files};
+use codespan::FileId;
 use codespan_reporting::diagnostic::{Diagnostic, Label};
-use codespan_reporting::term::{
-    emit,
-    termcolor::{ColorChoice, StandardStream},
-    Config,
-};
+
 use std::cell::RefCell;
 use std::hash::{Hash, Hasher};
-use std::io::{self};
 use std::rc::Rc;
-use std::sync::Arc;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Reporter {
