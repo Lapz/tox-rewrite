@@ -8,7 +8,8 @@ use syntax::{ast, text_of_first_token, AstNode, SmolStr, SyntaxKind, TextRange, 
 pub type Span = TextRange;
 
 #[derive(Debug, Default, Eq, PartialEq, Clone, Hash)]
-pub struct Program {
+pub struct SourceFile {
+    pub(crate) modules: Vec<Arc<Module>>,
     pub(crate) functions: Vec<Arc<Function>>,
     pub(crate) type_alias: Vec<Arc<TypeAlias>>,
 }
@@ -84,6 +85,12 @@ pub struct TypeAlias {
     pub(crate) type_params: Vec<TypeParamId>,
     pub(crate) ty: TypeId,
     pub(crate) span: Span,
+}
+
+#[derive(Debug, Eq, PartialEq, Hash)]
+pub struct Module {
+    pub(crate) name: NameId,
+    pub(crate) file: FileId,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -238,6 +245,7 @@ create_intern_key!(NameId);
 create_intern_key!(FunctionId);
 create_intern_key!(TypeId);
 create_intern_key!(LiteralId);
+create_intern_key!(ModuleId);
 
 impl UnaryOp {
     pub(crate) fn from_kind(kind: SyntaxKind) -> Option<UnaryOp> {

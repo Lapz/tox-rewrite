@@ -2,10 +2,7 @@ use crate::db::HirDatabase;
 use crate::hir;
 use errors::{FileId, Reporter, WithError};
 
-use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
-};
+use std::{collections::HashMap, sync::Arc};
 
 #[derive(Debug)]
 pub(crate) struct ResolverDataCollector<DB> {

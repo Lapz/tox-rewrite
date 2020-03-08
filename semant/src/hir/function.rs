@@ -1,6 +1,6 @@
 use super::{
-    Block, BlockId, Expr, ExprId, FunctionId, NameId, Param, ParamId, PatId, Pattern, Span, Stmt,
-    StmtId, Symbol, TypeParam, TypeParamId,
+    Block, BlockId, Expr, ExprId, NameId, Param, ParamId, PatId, Pattern, Span, Stmt, StmtId,
+    Symbol, TypeParam, TypeParamId,
 };
 use indexmap::IndexMap;
 use std::collections::hash_map::DefaultHasher;
