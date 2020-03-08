@@ -2,6 +2,7 @@ pub(crate) mod function;
 
 pub(crate) use function::{Function, FunctionAstMap};
 
+use errors::FileId;
 use std::sync::Arc;
 use syntax::{ast, text_of_first_token, AstNode, SmolStr, SyntaxKind, TextRange, T};
 pub type Span = TextRange;
@@ -27,22 +28,20 @@ pub struct StmtId(pub(crate) u64);
 
 pub struct BodyId(pub(crate) u64);
 
-macro_rules! create_intern_key {
-    ($name:ident) => {
-        #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
-        pub struct $name(salsa::InternId);
-        impl salsa::InternKey for $name {
-            fn from_intern_id(v: salsa::InternId) -> Self {
-                $name(v)
-            }
-            fn as_intern_id(&self) -> salsa::InternId {
-                self.0
-            }
-        }
-    };
-}
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Name(SmolStr);
+
+/// A symbol is composed of a name and the file it belongs to
+/// Symbols with the same name but from different files are not the sames
+/// i.e
+/// export foo {
+///
+/// };
+/// export foo {
+///
+/// };
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Symbol(pub(crate) FunctionId, pub(crate) FileId);
 
 impl Name {
     pub fn missing() -> Self {
@@ -68,8 +67,6 @@ impl From<ast::Name> for Name {
     }
 }
 
-create_intern_key!(FunctionId);
-
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Param {
     pub(crate) pat: PatId,
@@ -81,16 +78,9 @@ pub struct TypeParam {
     pub(crate) name: NameId,
 }
 
-create_intern_key!(ClassId);
-create_intern_key!(EnumId);
-create_intern_key!(TypeAliasId);
-create_intern_key!(NameId);
-create_intern_key!(TypeId);
-create_intern_key!(LiteralId);
-
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub struct TypeAlias {
-    pub(crate) name: Name,
+    pub(crate) name: NameId,
     pub(crate) type_params: Vec<TypeParamId>,
     pub(crate) ty: TypeId,
     pub(crate) span: Span,
@@ -226,6 +216,28 @@ pub enum UnaryOp {
     Minus,
     Excl,
 }
+
+macro_rules! create_intern_key {
+    ($name:ident) => {
+        #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+        pub struct $name(salsa::InternId);
+        impl salsa::InternKey for $name {
+            fn from_intern_id(v: salsa::InternId) -> Self {
+                $name(v)
+            }
+            fn as_intern_id(&self) -> salsa::InternId {
+                self.0
+            }
+        }
+    };
+}
+create_intern_key!(ClassId);
+create_intern_key!(EnumId);
+create_intern_key!(TypeAliasId);
+create_intern_key!(NameId);
+create_intern_key!(FunctionId);
+create_intern_key!(TypeId);
+create_intern_key!(LiteralId);
 
 impl UnaryOp {
     pub(crate) fn from_kind(kind: SyntaxKind) -> Option<UnaryOp> {

@@ -1,5 +1,6 @@
 use crate::db::HirDatabase;
 use crate::hir::{self};
+use errors::FileId;
 use std::sync::Arc;
 
 use syntax::{
@@ -28,15 +29,17 @@ where
     pub fn finish(
         self,
         exported: bool,
-        name: hir::Name,
+        id: hir::Symbol,
+
+        name: hir::NameId,
         body: Option<Vec<hir::StmtId>>,
         span: hir::Span,
     ) -> hir::Function {
         let params = self.params;
         let type_params = self.type_params;
         let map = self.ast_map;
-        let name = self.db.intern_name(name);
         hir::function::Function {
+            id,
             exported,
             name,
             map,
@@ -411,6 +414,7 @@ where
 
 pub(crate) fn lower_function_query(
     db: &impl HirDatabase,
+    file: FileId,
     fun_id: hir::FunctionId,
 ) -> Arc<hir::Function> {
     let mut collector = FunctionDataCollector {
@@ -458,5 +462,7 @@ pub(crate) fn lower_function_query(
 
     let span = function.syntax().text_range();
 
-    Arc::new(collector.finish(exported, name.unwrap(), body, span))
+    let name = db.intern_name(name.unwrap());
+
+    Arc::new(collector.finish(exported, hir::Symbol(fun_id, file), name, body, span))
 }

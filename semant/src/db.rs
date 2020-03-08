@@ -32,7 +32,7 @@ pub trait InternDatabase {
 #[salsa::query_group(HirDatabaseStorage)]
 pub trait HirDatabase: std::fmt::Debug + InternDatabase + ParseDatabase {
     #[salsa::invoke(crate::lower::lower_function_query)]
-    fn lower_function(&self, function: hir::FunctionId) -> Arc<hir::Function>;
+    fn lower_function(&self, file: FileId, function: hir::FunctionId) -> Arc<hir::Function>;
     #[salsa::invoke(crate::lower::lower_type_alias_query)]
     fn lower_type_alias(&self, alias: hir::TypeAliasId) -> Arc<hir::TypeAlias>;
     #[salsa::invoke(crate::lower::lower_query)]

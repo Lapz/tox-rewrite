@@ -21,7 +21,7 @@ pub(crate) fn lower_query(db: &impl HirDatabase, file: FileId) -> WithError<Arc<
 
     for function in source.functions() {
         let id = db.intern_function(function);
-        program.functions.push(db.lower_function(id));
+        program.functions.push(db.lower_function(file, id));
     }
 
     Ok(Arc::new(program))
