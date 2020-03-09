@@ -72,7 +72,7 @@ impl Cli {
                 }
             };
 
-            match db.resolve_program(handle) {
+            match db.resolve_source_file(handle) {
                 Ok(_) => {}
                 Err(more_errors) => {
                     errors.extend(more_errors);
