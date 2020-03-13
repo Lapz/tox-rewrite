@@ -3,7 +3,7 @@ pub(crate) mod function;
 pub(crate) use function::{Function, FunctionAstMap};
 
 use errors::FileId;
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 use syntax::{ast, text_of_first_token, AstNode, SmolStr, SyntaxKind, TextRange, T};
 pub type Span = TextRange;
 
@@ -68,6 +68,18 @@ impl From<ast::Name> for Name {
     }
 }
 
+impl AsRef<str> for Name {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl AsRef<Path> for Name {
+    fn as_ref(&self) -> &Path {
+        &Path::new(self.0.as_str())
+    }
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Param {
     pub(crate) pat: PatId,
@@ -91,6 +103,7 @@ pub struct TypeAlias {
 pub struct Module {
     pub(crate) name: NameId,
     pub(crate) file: FileId,
+    pub(crate) span: Span,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

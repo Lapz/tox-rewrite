@@ -1,5 +1,7 @@
 use crate::db::HirDatabase;
 use crate::hir;
+use crate::resolver::module::resolve_module;
+
 use errors::{FileId, Reporter, WithError};
 
 use std::{collections::HashMap, sync::Arc};
@@ -421,6 +423,10 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
 
     // collect the top level definitions first so we can
     // use forward declarations
+
+    for module in &program.modules {
+        resolve_module(db, file, module)?;
+    }
 
     for function in &program.functions {
         collector.insert_top_level(function.id, function.name, function.exported, function.span)

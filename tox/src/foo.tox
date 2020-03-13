@@ -1,0 +1,6 @@
+
+fn bar() {
+    for(let x = 10; x< 10; x=x+1) {
+         println("it works ")
+    };
+}

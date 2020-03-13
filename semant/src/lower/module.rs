@@ -3,7 +3,7 @@ use crate::HirDatabase;
 use errors::FileId;
 use std::sync::Arc;
 
-use syntax::NameOwner;
+use syntax::{AstNode, NameOwner};
 
 pub(crate) fn lower_module_query(
     db: &impl HirDatabase,
@@ -14,5 +14,6 @@ pub(crate) fn lower_module_query(
 
     let name = db.intern_name(module.name().map(|name| name.into()).unwrap());
 
-    Arc::new(hir::Module { file, name })
+    let span = module.syntax().text_range();
+    Arc::new(hir::Module { file, name, span })
 }

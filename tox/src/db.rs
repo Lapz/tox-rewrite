@@ -1,6 +1,7 @@
 use errors::{emit, ColorChoice, Config, Diagnostic, FileId, StandardStream};
 use parser::FilesExt;
 use std::default::Default;
+use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{self, Read};
 use std::path::PathBuf;
@@ -38,6 +39,10 @@ impl Diagnostics for DatabaseImpl {
 impl FilesExt for DatabaseImpl {
     fn source(&self, file: FileId) -> &Arc<str> {
         self.files.source(file)
+    }
+
+    fn path(&self, file: FileId) -> &OsStr {
+        self.files.name(file)
     }
 
     fn load_file(&mut self, path: &PathBuf) -> FileId {
