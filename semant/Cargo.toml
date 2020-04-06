@@ -16,7 +16,7 @@ serde ="*"
 
 
 [dev-dependencies]
-serde ="*"
+serde ="1.0.106"
 ron = "0.5.1"
 tempfile = "3.1.0"
 walkdir = "2"

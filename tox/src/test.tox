@@ -3,7 +3,7 @@ import foo::Struct;
 
 
 mod foo; 
-mod bar;
+
 
 type ParserResult<T> = Result<T,i32>;
 

@@ -1,11 +1,11 @@
 use serde::Deserialize;
 use std::{
     fs::{self, File},
-    io::{self, Read, Write},
-    path::Path,
+    io::{self, Write},
+    path::{Path, PathBuf},
 };
 
-use tempfile::{tempdir, Builder, TempDir};
+use tempfile::tempdir;
 #[derive(Debug, Deserialize)]
 pub struct DirectoryStructure {
     contents: Vec<TestStructure>,
@@ -35,27 +35,35 @@ impl std::default::Default for Type {
     }
 }
 
-pub fn create_structure(dir: &Path, structure: &DirectoryStructure) -> io::Result<()> {
+pub fn create_structure(
+    dir: &Path,
+    structure: &DirectoryStructure,
+    file_names: &mut Vec<PathBuf>,
+) -> io::Result<()> {
     for test in &structure.contents {
-        create_test(&dir, test)?
+        create_test(&dir, test, file_names)?
     }
 
     Ok(())
 }
 
-pub fn create_test(dir: &Path, test: &TestStructure) -> io::Result<()> {
+pub fn create_test(
+    dir: &Path,
+    test: &TestStructure,
+    file_names: &mut Vec<PathBuf>,
+) -> io::Result<()> {
     if test.kind == Type::Dir {
         fs::create_dir(dir.join(&test.name))?;
-
-        // let new_dir = Builder::new().prefix(&test.name).tempdir_in(dir.path())?;
-        // let dir = TempDir::new_in()?;
 
         create_structure(
             &dir.join(&test.name).as_path(),
             test.contents.as_ref().unwrap(),
+            file_names,
         )?;
     } else {
         let file_path = dir.join(&test.name);
+
+        file_names.push(file_path.clone());
         let mut file = File::create(file_path)?;
         write!(&mut file, "{}", test.text)?;
     }
@@ -72,16 +80,21 @@ mod test {
         )
         .expect("Invalid ron file");
     }
+
     #[test]
     fn it_works() -> io::Result<()> {
         let dir = tempdir()?;
-        // println!("{:?}",);
+
         let structure = load_file(&format!(
-            "{}/src/resolver/tests/with_dir.ron",
+            "{}/src/tests/with_dir.ron",
             env!("CARGO_MANIFEST_DIR")
         ));
 
-        create_structure(&dir.path(), &structure)?;
+        let mut file_names = Vec::new();
+
+        create_structure(&dir.path(), &structure, &mut file_names)?;
+
+        println!("{:?}", file_names);
 
         use walkdir::WalkDir;
 
