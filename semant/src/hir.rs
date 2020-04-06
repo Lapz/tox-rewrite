@@ -32,6 +32,12 @@ pub struct BodyId(pub(crate) u64);
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Name(SmolStr);
 
+#[derive(Debug, PartialEq, Eq, Hash)]
+pub struct ModuleGraph {
+    nodes: Vec<Module>,
+    edges: Vec<(FileId, FileId)>,
+}
+
 /// A symbol is composed of a name and the file it belongs to
 /// Symbols with the same name but from different files are not the sames
 /// i.e

@@ -31,8 +31,6 @@ pub fn resolve_module(db: &impl HirDatabase, file: FileId, module: &Module) -> W
 
     path_buf.push(format!("{}.tox", name));
 
-    println!("{:?}, {:?}", dir, path_buf);
-
     let (file_exists, dir_exists) = (path_buf.exists(), dir.exists());
 
     match (file_exists, dir_exists) {
