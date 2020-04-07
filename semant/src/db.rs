@@ -11,6 +11,9 @@ pub trait InternDatabase {
     fn intern_module(&self, mod_def: ast::ModDef) -> hir::ModuleId;
 
     #[salsa::interned]
+    fn intern_import(&self, import_def: ast::ImportDef) -> hir::ImportId;
+
+    #[salsa::interned]
     fn intern_function(&self, fn_def: ast::FnDef) -> hir::FunctionId;
 
     #[salsa::interned]
@@ -38,14 +41,16 @@ pub trait HirDatabase: std::fmt::Debug + InternDatabase + ParseDatabase {
     fn lower_function(&self, file: FileId, function: hir::FunctionId) -> Arc<hir::Function>;
     #[salsa::invoke(crate::lower::lower_module_query)]
     fn lower_module(&self, file: FileId, module: hir::ModuleId) -> Arc<hir::Module>;
+    #[salsa::invoke(crate::lower::lower_import_query)]
+    fn lower_import(&self, file: FileId, import: hir::ImportId) -> Arc<hir::Import>;
     #[salsa::invoke(crate::lower::lower_type_alias_query)]
     fn lower_type_alias(&self, alias: hir::TypeAliasId) -> Arc<hir::TypeAlias>;
     #[salsa::invoke(crate::lower::lower_query)]
     fn lower(&self, file: FileId) -> WithError<Arc<hir::SourceFile>>;
-    #[salsa::invoke(crate::resolver::resolve_imports_query)]
+    #[salsa::invoke(crate::resolver::resolve_exports_query)]
     fn resolve_imports(&self, file: FileId) -> WithError<Arc<FileTable>>;
-    #[salsa::invoke(crate::resolver::resolve_imports_query)]
-    fn resolve_modules(&self, file: FileId) -> WithError<Arc<FileTable>>;
+    #[salsa::invoke(crate::resolver::resolve_modules_query)]
+    fn resolve_modules(&self, file: FileId, module: hir::ModuleId) -> WithError<()>;
     #[salsa::invoke(crate::resolver::resolve_source_file_query)]
     fn resolve_source_file(&self, file: FileId) -> WithError<()>;
 }

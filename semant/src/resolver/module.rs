@@ -1,4 +1,4 @@
-use crate::hir::Module;
+use crate::hir::{Module, ModuleId};
 use crate::HirDatabase;
 use errors::{FileId, Reporter, WithError};
 use std::path::PathBuf;
@@ -15,8 +15,13 @@ use std::path::PathBuf;
 /// |-foo
 /// | |-bar.tox
 
-pub fn resolve_module(db: &impl HirDatabase, file: FileId, module: &Module) -> WithError<()> {
+pub fn resolve_modules_query(
+    db: &impl HirDatabase,
+    file: FileId,
+    mod_id: ModuleId,
+) -> WithError<()> {
     let mut reporter = Reporter::new(file);
+    let module = db.lower_module(file, mod_id);
 
     let name = db.lookup_intern_name(module.name);
 

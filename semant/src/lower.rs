@@ -1,18 +1,26 @@
 mod alias;
 mod function;
+mod imports;
 mod module;
 use crate::db::HirDatabase;
 use crate::hir;
-pub(crate) use alias::lower_type_alias_query;
 use errors::{FileId, WithError};
-pub(crate) use function::lower_function_query;
-pub(crate) use module::lower_module_query;
 use std::sync::Arc;
-use syntax::{FnDefOwner, ModuleDefOwner, TypeAliasDefOwner};
+use syntax::{ExternImportDefOwner, FnDefOwner, ModuleDefOwner, TypeAliasDefOwner};
+
+pub(crate) use alias::lower_type_alias_query;
+pub(crate) use function::lower_function_query;
+pub(crate) use imports::lower_import_query;
+pub(crate) use module::lower_module_query;
 
 pub(crate) fn lower_query(db: &impl HirDatabase, file: FileId) -> WithError<Arc<hir::SourceFile>> {
     let source = db.parse(file)?;
     let mut program = hir::SourceFile::default();
+
+    for import in source.imports() {
+        let id = db.intern_import(import);
+        program.imports.push(db.lower_import(file, id));
+    }
 
     for module in source.modules() {
         let id = db.intern_module(module);

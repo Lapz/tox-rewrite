@@ -1,8 +1,9 @@
-import foo::bar;
+import foo::bar::{bar,biz};
 import foo::Struct;
 
 
 mod foo; 
+
 
 
 type ParserResult<T> = Result<T,i32>;

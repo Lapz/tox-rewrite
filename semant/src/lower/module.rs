@@ -15,5 +15,10 @@ pub(crate) fn lower_module_query(
     let name = db.intern_name(module.name().map(|name| name.into()).unwrap());
 
     let span = module.syntax().text_range();
-    Arc::new(hir::Module { file, name, span })
+    Arc::new(hir::Module {
+        id: mod_id,
+        file,
+        name,
+        span,
+    })
 }

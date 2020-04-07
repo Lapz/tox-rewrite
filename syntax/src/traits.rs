@@ -255,3 +255,9 @@ pub trait TypesOwner: AstNode {
         children(self)
     }
 }
+
+pub trait ImportSegmentOwner: AstNode {
+    fn segments(&self) -> AstChildren<ast::ImportSegment> {
+        children(self)
+    }
+}

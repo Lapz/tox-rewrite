@@ -94,6 +94,7 @@ Grammar(
         "MOD_DEF",
         "TYPE_ALIAS_DEF",
         "IMPORT_SEGMENT",
+        "IMPORT_LIST",
         //patterns
         "BIND_PAT",
         "PLACEHOLDER_PAT",
@@ -130,8 +131,6 @@ Grammar(
         "RETURN_EXPR",
         "CLOSURE_EXPR",
         "PAREN_EXPR",
-        
-
         "MATCH_EXPR",
         "MATCH_ARM_LIST",
         "MATCH_ARM",
@@ -201,7 +200,10 @@ Grammar(
             options: ["TypeRef"]
         ),
         "ImportDef":(
-            options: [["imports","Name"]]
+            options: [["imports","ImportSegment"], "ImportList"],
+            traits: [
+                "ImportSegmentOwner"
+            ]
         ),
         "ModDef":(
             traits: [
@@ -261,9 +263,14 @@ Grammar(
             collections: [ [ "pats", "Pat" ] ],
         ),
         "ImportSegment": (
-            options:[
-                "Name"
+            options: [
+                "Name",
+               
             ]
+        ),
+        "ImportList": (
+            traits: ["ImportSegmentOwner"],
+            collections: [ ["segments", "ImportSegment" ] ]
         ),
         "NamedFieldList": (
             collections: [ ["fields", "NamedField"] ]),

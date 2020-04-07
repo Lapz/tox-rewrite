@@ -1,6 +1,5 @@
 use crate::db::HirDatabase;
 use crate::hir;
-use crate::resolver::module::resolve_module;
 
 use errors::{FileId, Reporter, WithError};
 
@@ -391,7 +390,7 @@ where
     }
 }
 
-pub fn resolve_imports_query(db: &impl HirDatabase, file: FileId) -> WithError<Arc<FileTable>> {
+pub fn resolve_exports_query(db: &impl HirDatabase, file: FileId) -> WithError<Arc<FileTable>> {
     let program = db.lower(file)?;
     let reporter = Reporter::new(file);
     let mut collector = ResolverDataCollector {
@@ -425,9 +424,8 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
     // use forward declarations
 
     for module in &program.modules {
-        resolve_module(db, file, module)?;
+        db.resolve_modules(file, module.id)?;
     }
-
     for function in &program.functions {
         collector.insert_top_level(function.id, function.name, function.exported, function.span)
     }

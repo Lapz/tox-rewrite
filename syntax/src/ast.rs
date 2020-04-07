@@ -102,63 +102,64 @@ pub enum SyntaxKind {
     MOD_DEF, // 77
     TYPE_ALIAS_DEF, // 78
     IMPORT_SEGMENT, // 79
-    BIND_PAT, // 80
-    PLACEHOLDER_PAT, // 81
-    TUPLE_PAT, // 82
-    LITERAL_PAT, // 83
-    TYPE_REF, // 84
-    FN_TYPE, // 85
-    PAREN_TYPE, // 86
-    ARRAY_TYPE, // 87
-    IDENT_TYPE, // 88
-    RET_TYPE, // 89
-    ARRAY_EXPR, // 90
-    CALL_EXPR, // 91
-    CAST_EXPR, // 92
-    INDEX_EXPR, // 93
-    FIELD_EXPR, // 94
-    BIN_EXPR, // 95
-    PREFIX_EXPR, // 96
-    TUPLE_EXPR, // 97
-    IDENT_EXPR, // 98
-    IF_EXPR, // 99
-    WHILE_EXPR, // 100
-    CONDITION, // 101
-    LOOP_EXPR, // 102
-    DO_EXPR, // 103
-    FOR_EXPR, // 104
-    CONTINUE_EXPR, // 105
-    BREAK_EXPR, // 106
-    BLOCK_EXPR, // 107
-    RETURN_EXPR, // 108
-    CLOSURE_EXPR, // 109
-    PAREN_EXPR, // 110
-    MATCH_EXPR, // 111
-    MATCH_ARM_LIST, // 112
-    MATCH_ARM, // 113
-    MATCH_GUARD, // 114
-    CLASS_LIT, // 115
-    NAMED_FIELD_LIST, // 116
-    NAMED_FIELD, // 117
-    ENUM_VARIANT, // 118
-    NAMED_FIELD_DEF_LIST, // 119
-    NAMED_FIELD_DEF, // 120
-    RECORD_LITERAL_FIELD_LIST, // 121
-    RECORD_LITERAL_FIELD, // 122
-    RECORD_LITERAL_EXPR, // 123
-    ENUM_VARIANT_LIST, // 124
-    VISIBILITY, // 125
-    LITERAL, // 126
-    NAME, // 127
-    NAME_REF, // 128
-    LET_STMT, // 129
-    EXPR_STMT, // 130
-    TYPE_PARAM_LIST, // 131
-    TYPE_PARAM, // 132
-    PARAM_LIST, // 133
-    PARAM, // 134
-    SELF_PARAM, // 135
-    ARG_LIST, // 136
+    IMPORT_LIST, // 80
+    BIND_PAT, // 81
+    PLACEHOLDER_PAT, // 82
+    TUPLE_PAT, // 83
+    LITERAL_PAT, // 84
+    TYPE_REF, // 85
+    FN_TYPE, // 86
+    PAREN_TYPE, // 87
+    ARRAY_TYPE, // 88
+    IDENT_TYPE, // 89
+    RET_TYPE, // 90
+    ARRAY_EXPR, // 91
+    CALL_EXPR, // 92
+    CAST_EXPR, // 93
+    INDEX_EXPR, // 94
+    FIELD_EXPR, // 95
+    BIN_EXPR, // 96
+    PREFIX_EXPR, // 97
+    TUPLE_EXPR, // 98
+    IDENT_EXPR, // 99
+    IF_EXPR, // 100
+    WHILE_EXPR, // 101
+    CONDITION, // 102
+    LOOP_EXPR, // 103
+    DO_EXPR, // 104
+    FOR_EXPR, // 105
+    CONTINUE_EXPR, // 106
+    BREAK_EXPR, // 107
+    BLOCK_EXPR, // 108
+    RETURN_EXPR, // 109
+    CLOSURE_EXPR, // 110
+    PAREN_EXPR, // 111
+    MATCH_EXPR, // 112
+    MATCH_ARM_LIST, // 113
+    MATCH_ARM, // 114
+    MATCH_GUARD, // 115
+    CLASS_LIT, // 116
+    NAMED_FIELD_LIST, // 117
+    NAMED_FIELD, // 118
+    ENUM_VARIANT, // 119
+    NAMED_FIELD_DEF_LIST, // 120
+    NAMED_FIELD_DEF, // 121
+    RECORD_LITERAL_FIELD_LIST, // 122
+    RECORD_LITERAL_FIELD, // 123
+    RECORD_LITERAL_EXPR, // 124
+    ENUM_VARIANT_LIST, // 125
+    VISIBILITY, // 126
+    LITERAL, // 127
+    NAME, // 128
+    NAME_REF, // 129
+    LET_STMT, // 130
+    EXPR_STMT, // 131
+    TYPE_PARAM_LIST, // 132
+    TYPE_PARAM, // 133
+    PARAM_LIST, // 134
+    PARAM, // 135
+    SELF_PARAM, // 136
+    ARG_LIST, // 137
     // Technical kind so that we can cast from u16 safely
     #[doc(hidden)]
     __LAST,
@@ -257,6 +258,7 @@ impl SyntaxKind {
             MOD_DEF => "MOD_DEF",
             TYPE_ALIAS_DEF => "TYPE_ALIAS_DEF",
             IMPORT_SEGMENT => "IMPORT_SEGMENT",
+            IMPORT_LIST => "IMPORT_LIST",
             BIND_PAT => "BIND_PAT",
             PLACEHOLDER_PAT => "PLACEHOLDER_PAT",
             TUPLE_PAT => "TUPLE_PAT",
@@ -1239,9 +1241,42 @@ impl AstNode for ImportDef {
 }
 
 
+impl traits::ImportSegmentOwner for ImportDef {}
 impl ImportDef {
-    pub fn imports(&self) -> Option<Name> {
+    pub fn imports(&self) -> Option<ImportSegment> {
         child_opt(self)
+    }
+
+    pub fn import_list(&self) -> Option<ImportList> {
+        child_opt(self)
+    }
+}
+
+// ImportList
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ImportList {
+    pub(crate) syntax: SyntaxNode,
+}
+
+impl AstNode for ImportList {
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            IMPORT_LIST => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) { Some(ImportList { syntax }) } else { None }
+    }
+    fn syntax(&self) -> &SyntaxNode { &self.syntax }
+}
+
+
+impl traits::ImportSegmentOwner for ImportList {}
+impl ImportList {
+    pub fn segments(&self) -> impl Iterator<Item = ImportSegment> {
+        children(self)
     }
 }
 
