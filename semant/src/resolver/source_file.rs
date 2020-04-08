@@ -3,6 +3,7 @@ use crate::hir;
 
 use errors::{FileId, Reporter, WithError};
 
+use super::module_graph::ModuleGraph;
 use std::{collections::HashMap, sync::Arc};
 
 #[derive(Debug)]
@@ -414,6 +415,8 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
     let program = db.lower(file)?;
     let reporter = Reporter::new(file);
 
+    let mut module_graph = ModuleGraph::new();
+
     let mut collector = ResolverDataCollector {
         db,
         reporter,
@@ -426,6 +429,7 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
     for module in &program.modules {
         db.resolve_modules(file, module.id)?;
     }
+
     for function in &program.functions {
         collector.insert_top_level(function.id, function.name, function.exported, function.span)
     }

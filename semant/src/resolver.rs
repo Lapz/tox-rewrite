@@ -1,5 +1,6 @@
 mod imports;
 mod module;
+mod module_graph;
 mod source_file;
 
 pub(crate) use module::resolve_modules_query;

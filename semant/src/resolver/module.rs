@@ -22,7 +22,6 @@ pub fn resolve_modules_query(
 ) -> WithError<()> {
     let mut reporter = Reporter::new(file);
     let module = db.lower_module(file, mod_id);
-
     let name = db.lookup_intern_name(module.name);
 
     let span = module.span;
