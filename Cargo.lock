@@ -175,6 +175,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "codespan-reporting"
+version = "0.9.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "termcolor 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "unicode-width 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "console"
 version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -313,7 +322,9 @@ version = "0.1.0"
 dependencies = [
  "codespan 0.8.0 (git+https://github.com/Lapz/codespan)",
  "codespan-reporting 0.8.0 (git+https://github.com/Lapz/codespan)",
+ "codespan-reporting 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "salsa 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1186,6 +1197,7 @@ dependencies = [
 name = "tox"
 version = "0.1.0"
 dependencies = [
+ "codespan-reporting 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "errors 0.1.0",
  "insta 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "parser 0.1.0",
@@ -1386,6 +1398,7 @@ dependencies = [
 "checksum cloudabi 0.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ddfc5b9aa5d4507acaf872de71051dfd0e309860e88966e1051e462a077aac4f"
 "checksum codespan 0.8.0 (git+https://github.com/Lapz/codespan)" = "<none>"
 "checksum codespan-reporting 0.8.0 (git+https://github.com/Lapz/codespan)" = "<none>"
+"checksum codespan-reporting 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)" = "4efca5ddfdf45cee2eedd9dadbe7a5fa90a5536af6f580f1814267b2a4d6107f"
 "checksum console 0.7.7 (registry+https://github.com/rust-lang/crates.io-index)" = "8ca57c2c14b8a2bf3105bc9d15574aad80babf6a9c44b1058034cdf8bd169628"
 "checksum crossbeam 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)" = "69323bff1fb41c635347b8ead484a5ca6c3f11914d784170b158d8449ab07f8e"
 "checksum crossbeam-channel 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "cced8691919c02aac3cb0a1bc2e9b73d89e832bf9a06fc579d4e71b68a2da061"

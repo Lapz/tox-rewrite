@@ -1,15 +1,17 @@
-use errors::{emit, ColorChoice, Config, Diagnostic, FileId, StandardStream};
+use errors::{emit, ColorChoice, Config, Diagnostic, FileDatabase, FileId, StandardStream};
 use parser::FilesExt;
+use reporting::files;
 use std::default::Default;
 use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{self, Read};
-use std::path::PathBuf;
-use std::sync::Arc;
+use std::path::{Path, PathBuf};
+use std::{ops::Range, sync::Arc};
 #[salsa::database(
     semant::HirDatabaseStorage,
     semant::InternDatabaseStorage,
-    parser::ParseDatabaseStorage
+    parser::ParseDatabaseStorage,
+    errors::FileDatabaseStorage
 )]
 #[derive(Debug, Default)]
 pub struct DatabaseImpl {
@@ -69,4 +71,26 @@ fn read_file(name: &PathBuf) -> io::Result<String> {
     file.read_to_string(&mut contents)?;
 
     Ok(contents)
+}
+
+impl<'files> files::Files<'files> for DatabaseImpl {
+    type FileId = errors::db::FileId;
+    type Name = &'files String;
+    type Source = &'files String;
+
+    fn name(&self, file_id: errors::db::FileId) -> Option<&String> {
+        Some(&errors::db::FileDatabase::name(self, file_id))
+    }
+
+    fn source(&self, file_id: errors::db::FileId) -> Option<&String> {
+        Some(&errors::db::FileDatabase::source(self, file_id))
+    }
+
+    fn line_index(&self, file_id: errors::db::FileId, byte_index: usize) -> Option<usize> {
+        errors::db::FileDatabase::line_index(self, file_id, byte_index)
+    }
+
+    fn line_range(&self, file_id: errors::db::FileId, line_index: usize) -> Option<Range<usize>> {
+        errors::db::FileDatabase::line_range(self, file_id, line_index)
+    }
 }

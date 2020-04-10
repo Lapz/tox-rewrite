@@ -1,6 +1,7 @@
+pub mod db;
+mod files;
 pub mod pos;
 mod reporter;
-
 pub use crate::reporter::Reporter;
 pub use codespan::{FileId, Files};
 pub use codespan_reporting::{
@@ -11,7 +12,7 @@ pub use codespan_reporting::{
         Config,
     },
 };
-
+pub use db::{FileDatabase, FileDatabaseStorage};
 pub type WithError<T> = Result<T, Vec<Diagnostic<FileId>>>;
 
 #[cfg(test)]

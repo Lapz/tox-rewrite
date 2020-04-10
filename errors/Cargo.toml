@@ -9,4 +9,6 @@ edition = "2018"
 [dependencies]
 codespan = {version="0.8.0",git="https://github.com/Lapz/codespan"}
 codespan-reporting = {version="0.8.0",git="https://github.com/Lapz/codespan"}
+reporting = {version="^0.9.0",package="codespan-reporting"}
 itertools="*"
+salsa = "^0.14.1"
