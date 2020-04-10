@@ -6,7 +6,7 @@ use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
-use std::{ops::Range, sync::Arc};
+use std::{borrow::Cow, ops::Range, sync::Arc};
 #[salsa::database(
     semant::HirDatabaseStorage,
     semant::InternDatabaseStorage,
@@ -75,15 +75,17 @@ fn read_file(name: &PathBuf) -> io::Result<String> {
 
 impl<'files> files::Files<'files> for DatabaseImpl {
     type FileId = errors::db::FileId;
-    type Name = &'files String;
-    type Source = &'files String;
+    type Name = String;
+    type Source = Cow<'files, str>;
 
-    fn name(&self, file_id: errors::db::FileId) -> Option<&String> {
-        Some(&errors::db::FileDatabase::name(self, file_id))
+    fn name(&self, file_id: errors::db::FileId) -> Option<&str> {
+        Some(errors::db::FileDatabase::file(self, file_id).name)
     }
 
-    fn source(&self, file_id: errors::db::FileId) -> Option<&String> {
-        Some(&errors::db::FileDatabase::source(self, file_id))
+    fn source(&self, file_id: errors::db::FileId) -> Option<Self::Source> {
+        let s = errors::db::FileDatabase::file(self, file_id).source;
+        let s: String = (*&s);
+        Some(s)
     }
 
     fn line_index(&self, file_id: errors::db::FileId, byte_index: usize) -> Option<usize> {
