@@ -1,12 +1,7 @@
-use errors::{emit, ColorChoice, Config, Diagnostic, FileDatabase, FileId, StandardStream};
-use parser::FilesExt;
-use reporting::files;
+use errors::{emit, ColorChoice, Config, Diagnostic, FileDatabase, FileId, Files, StandardStream};
 use std::default::Default;
-use std::ffi::OsStr;
-use std::fs::File;
-use std::io::{self, Read};
-use std::path::{Path, PathBuf};
-use std::{borrow::Cow, ops::Range, sync::Arc};
+use std::io::{self};
+use std::ops::Range;
 #[salsa::database(
     semant::HirDatabaseStorage,
     semant::InternDatabaseStorage,
@@ -16,7 +11,6 @@ use std::{borrow::Cow, ops::Range, sync::Arc};
 #[derive(Debug, Default)]
 pub struct DatabaseImpl {
     runtime: salsa::Runtime<DatabaseImpl>,
-    files: errors::Files<Arc<str>>,
     diagnostics: Vec<Diagnostic<FileId>>,
 }
 
@@ -31,25 +25,10 @@ impl Diagnostics for DatabaseImpl {
         let config = Config::default();
 
         while let Some(diagnostic) = diagnostics.pop() {
-            emit(&mut writer, &config, &self.files, &diagnostic)?
+            emit(&mut writer, &config, self, &diagnostic)?
         }
 
         Ok(())
-    }
-}
-
-impl FilesExt for DatabaseImpl {
-    fn source(&self, file: FileId) -> &Arc<str> {
-        self.files.source(file)
-    }
-
-    fn path(&self, file: FileId) -> &OsStr {
-        self.files.name(file)
-    }
-
-    fn load_file(&mut self, path: &PathBuf) -> FileId {
-        let source = read_file(path).expect("Couldn't read a file");
-        self.files.add(path, source.into())
     }
 }
 
@@ -63,36 +42,24 @@ impl salsa::Database for DatabaseImpl {
     }
 }
 
-fn read_file(name: &PathBuf) -> io::Result<String> {
-    let mut file = File::open(name)?;
-
-    let mut contents = String::new();
-
-    file.read_to_string(&mut contents)?;
-
-    Ok(contents)
-}
-
-impl<'files> files::Files<'files> for DatabaseImpl {
-    type FileId = errors::db::FileId;
+impl<'files> Files<'files> for DatabaseImpl {
+    type FileId = FileId;
     type Name = String;
-    type Source = Cow<'files, str>;
+    type Source = String;
 
-    fn name(&self, file_id: errors::db::FileId) -> Option<&str> {
-        Some(errors::db::FileDatabase::file(self, file_id).name)
+    fn name(&self, file_id: FileId) -> Option<Self::Name> {
+        Some((*errors::db::FileDatabase::file(self, file_id).name).clone())
     }
 
-    fn source(&self, file_id: errors::db::FileId) -> Option<Self::Source> {
-        let s = errors::db::FileDatabase::file(self, file_id).source;
-        let s: String = (*&s);
-        Some(s)
+    fn source(&self, file_id: FileId) -> Option<Self::Source> {
+        Some((*errors::db::FileDatabase::file(self, file_id).source).clone())
     }
 
-    fn line_index(&self, file_id: errors::db::FileId, byte_index: usize) -> Option<usize> {
+    fn line_index(&self, file_id: FileId, byte_index: usize) -> Option<usize> {
         errors::db::FileDatabase::line_index(self, file_id, byte_index)
     }
 
-    fn line_range(&self, file_id: errors::db::FileId, line_index: usize) -> Option<Range<usize>> {
+    fn line_range(&self, file_id: FileId, line_index: usize) -> Option<Range<usize>> {
         errors::db::FileDatabase::line_range(self, file_id, line_index)
     }
 }

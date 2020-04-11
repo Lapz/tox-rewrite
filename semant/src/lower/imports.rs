@@ -3,7 +3,7 @@ use crate::HirDatabase;
 use errors::FileId;
 use std::sync::Arc;
 
-use syntax::{AstNode, ImportSegmentOwner, NameOwner};
+use syntax::{AstNode, ImportSegmentOwner};
 
 pub(crate) fn lower_import_query(
     db: &impl HirDatabase,

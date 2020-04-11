@@ -1,6 +1,5 @@
 use reporting::files;
 use std::{
-    ffi::{OsStr, OsString},
     fs,
     io::{self, Read},
     ops::Range,
@@ -33,16 +32,11 @@ impl salsa::InternKey for FileId {
 pub trait FileDatabase {
     #[salsa::interned]
     fn intern_file(&self, path: PathBuf) -> FileId;
-
     fn source(&self, file: FileId) -> Arc<String>;
     fn name(&self, file: FileId) -> Arc<String>;
     fn file(&self, file: FileId) -> Arc<File>;
     fn line_index(&self, file: FileId, byte_index: usize) -> Option<usize>;
     fn line_range(&self, file: FileId, line_index: usize) -> Option<Range<usize>>;
-}
-pub trait FilesExt: salsa::Database {
-    fn source(&self, file: FileId) -> &Arc<str>;
-    fn path(&self, file: FileId) -> &OsStr;
 }
 
 fn source(db: &impl FileDatabase, file_id: FileId) -> Arc<String> {

@@ -1,6 +1,6 @@
-use codespan::FileId;
-use codespan_reporting::diagnostic::{Diagnostic, Label};
+use codespan_reporting::diagnostic::{Diagnostic, Label, LabelStyle};
 
+use crate::FileId;
 use std::cell::RefCell;
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
@@ -36,8 +36,11 @@ impl Reporter {
         span: (impl Into<usize>, impl Into<usize>),
     ) {
         let span = span.0.into()..span.1.into();
-        let label = Label::new(self.file, span, message);
-        let diagnostic = Diagnostic::new_error(additional_info, label);
+        let label = Label::new(LabelStyle::Primary, self.file, span);
+        let diagnostic = Diagnostic::error()
+            .with_message(message)
+            .with_notes(vec![additional_info.into()])
+            .with_labels(vec![label]);
         self.diagnostics.borrow_mut().push(diagnostic)
     }
 
@@ -48,8 +51,11 @@ impl Reporter {
         span: (impl Into<usize>, impl Into<usize>),
     ) {
         let span = span.0.into()..span.1.into();
-        let label = Label::new(self.file, span, message);
-        let diagnostic = Diagnostic::new_warning(additional_info, label);
+        let label = Label::new(LabelStyle::Primary, self.file, span);
+        let diagnostic = Diagnostic::warning()
+            .with_message(message)
+            .with_notes(vec![additional_info.into()])
+            .with_labels(vec![label]);
         self.diagnostics.borrow_mut().push(diagnostic)
     }
 

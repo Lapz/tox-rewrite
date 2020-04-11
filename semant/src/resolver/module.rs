@@ -1,7 +1,6 @@
-use crate::hir::{Module, ModuleId};
+use crate::hir::ModuleId;
 use crate::HirDatabase;
 use errors::{FileId, Reporter, WithError};
-use std::path::PathBuf;
 
 /// Resolves all modules
 /// Our module structure is as follows
@@ -26,7 +25,7 @@ pub fn resolve_modules_query(
 
     let span = module.span;
 
-    let mut path_buf = PathBuf::from(db.path(module.file));
+    let mut path_buf = db.lookup_intern_file(module.file);
     path_buf.pop();
 
     let mut dir = path_buf.clone();
@@ -49,7 +48,7 @@ pub fn resolve_modules_query(
         }
 
         (true, false) => {
-            if path_buf == PathBuf::from(db.path(module.file)) {
+            if path_buf == db.lookup_intern_file(module.file) {
                 reporter.error(
                     format!("Unresolved module `{}`", name),
                     format!("Sub-module folder for `{}` is missing", name),
@@ -80,7 +79,7 @@ pub fn resolve_modules_query(
 
             // module exists and is the same as the one its being decleared in
             // check its children and report an err if its not found
-            if path_buf == PathBuf::from(db.path(module.file)) && !dir.exists() {
+            if path_buf == db.lookup_intern_file(module.file) && !dir.exists() {
                 reporter.error(
                     format!("Unresolved module `{}`", name),
                     "",
