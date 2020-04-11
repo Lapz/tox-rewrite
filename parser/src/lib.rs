@@ -1,6 +1,8 @@
 #[macro_use]
 mod macros;
 mod db;
+#[cfg(test)]
+mod lexer;
 mod parse;
 mod parser;
 mod utils;
