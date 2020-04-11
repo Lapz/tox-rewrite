@@ -564,6 +564,7 @@ dependencies = [
  "rowan 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "salsa 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "syntax 0.1.0",
+ "tempfile 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1079,6 +1080,7 @@ dependencies = [
  "insta 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rowan 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tempfile 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

@@ -1,3 +1,5 @@
+#[cfg(test)]
+pub use self::test::MockDatabaseImpl;
 use reporting::files;
 use std::{
     fs,
@@ -96,6 +98,26 @@ impl File {
             Ordering::Less => self.line_starts.get(line_index).cloned(),
             Ordering::Equal => Some(self.source.len()),
             Ordering::Greater => None,
+        }
+    }
+}
+
+#[cfg(test)]
+pub mod test {
+    use super::FileDatabaseStorage;
+    #[salsa::database(FileDatabaseStorage)]
+    #[derive(Debug, Default)]
+    pub struct MockDatabaseImpl {
+        runtime: salsa::Runtime<MockDatabaseImpl>,
+    }
+
+    impl salsa::Database for MockDatabaseImpl {
+        fn salsa_runtime(&self) -> &salsa::Runtime<MockDatabaseImpl> {
+            &self.runtime
+        }
+
+        fn salsa_runtime_mut(&mut self) -> &mut salsa::Runtime<MockDatabaseImpl> {
+            &mut self.runtime
         }
     }
 }

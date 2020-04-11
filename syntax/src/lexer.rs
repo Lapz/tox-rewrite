@@ -400,68 +400,61 @@ fn spans(token: SyntaxKind, start: Position, end: Position) -> Span<Token> {
 #[cfg(test)]
 mod test {
 
-    use super::{Lexer, Reporter};
-    use errors::Files;
+    use crate::Token;
+
+    use errors::{pos::Span, MockDatabaseImpl};
     use insta::assert_debug_snapshot_matches;
+    use std::io::{self, Write};
+    use tempfile::NamedTempFile;
 
-    fn setup_reporter(input: &str) -> Reporter {
-        let mut files = Files::new();
-        let file_id = files.add("test", input);
+    fn get_tokens(input: &str) -> io::Result<Vec<Span<Token>>> {
+        let file = NamedTempFile::new()?;
+        write!(file, "{}", input)?;
 
-        let reporter = Reporter::new(file_id);
-        reporter
+        let db = MockDatabaseImpl::default();
+        let handle = db.intern_file(file.path());
+
+        db.lex(handle)?
     }
 
     #[test]
     fn it_works() {
         let input = "fn main() {print(\"hello\")}";
-        let reporter = setup_reporter(&input);
-        let tokens = Lexer::new(input, reporter).lex();
 
-        assert_debug_snapshot_matches!(tokens)
+        assert_debug_snapshot_matches!(get_tokens(input).unwrap())
     }
     #[test]
     fn lex_int() {
         let input = "12,34,,45,67,89,0";
-        let reporter = setup_reporter(&input);
-        let tokens = Lexer::new(input, reporter).lex();
 
-        assert_debug_snapshot_matches!(tokens)
+        assert_debug_snapshot_matches!(get_tokens(input).unwrap())
     }
 
     #[test]
     fn lex_floats() {
         let input = "12.34,45.67,89.10";
-        let reporter = setup_reporter(&input);
-        let tokens = Lexer::new(input, reporter).lex();
 
-        assert_debug_snapshot_matches!(tokens)
+        assert_debug_snapshot_matches!(get_tokens(input).unwrap())
     }
 
     #[test]
     fn lex_block_comments() {
         let input = "12 /*this is a comment */ 34";
-        let reporter = setup_reporter(&input);
-        let tokens = Lexer::new(input, reporter).lex();
 
-        assert_debug_snapshot_matches!(tokens)
+        assert_debug_snapshot_matches!(get_tokens(input).unwrap())
     }
 
     #[test]
     fn lex_nested_block_comments() {
         let input = "/*this /*is a nested */  comment */";
-        let reporter = setup_reporter(&input);
-        let tokens = Lexer::new(input, reporter).lex();
 
-        assert_debug_snapshot_matches!(tokens)
+        assert_debug_snapshot_matches!(get_tokens(input).unwrap())
     }
 
     #[test]
     fn lex_line_comment() {
         let input = "12 // this is a line comment";
-        let reporter = setup_reporter(&input);
-        let tokens = Lexer::new(input, reporter).lex();
 
-        assert_debug_snapshot_matches!(tokens)
+        assert_debug_snapshot_matches!(get_tokens(input).unwrap())
     }
 }

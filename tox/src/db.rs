@@ -1,4 +1,4 @@
-use errors::{emit, ColorChoice, Config, Diagnostic, FileDatabase, FileId, Files, StandardStream};
+use errors::{emit, ColorChoice, Config, Diagnostic, FileId, Files, StandardStream};
 use std::default::Default;
 use std::io::{self};
 use std::ops::Range;
@@ -11,7 +11,6 @@ use std::ops::Range;
 #[derive(Debug, Default)]
 pub struct DatabaseImpl {
     runtime: salsa::Runtime<DatabaseImpl>,
-    diagnostics: Vec<Diagnostic<FileId>>,
 }
 
 pub(crate) trait Diagnostics {
