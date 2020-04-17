@@ -35,6 +35,7 @@ pub struct Name(SmolStr);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Import {
+    pub(crate) id: ImportId,
     pub(crate) segments: Vec<Segment>,
     pub(crate) file: FileId,
     pub(crate) span: Span,

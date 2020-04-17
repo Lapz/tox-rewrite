@@ -415,19 +415,19 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
     let program = db.lower(file)?;
     let reporter = Reporter::new(file);
 
-    let mut module_graph = ModuleGraph::new();
-
     let mut collector = ResolverDataCollector {
         db,
         reporter,
         table: FileTable::new(),
     };
 
+    let _ = db.module_graph(file)?;
+
     // collect the top level definitions first so we can
     // use forward declarations
 
-    for module in &program.modules {
-        db.resolve_modules(file, module.id)?;
+    for import in &program.imports {
+        db.resolve_import(file, import.id)?;
     }
 
     for function in &program.functions {

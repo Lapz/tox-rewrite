@@ -41,6 +41,7 @@ pub(crate) fn lower_import_query(
 
     Arc::new(hir::Import {
         segments,
+        id: import_id,
         file,
         span,
     })

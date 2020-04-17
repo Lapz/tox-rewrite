@@ -18,7 +18,7 @@ pub fn resolve_modules_query(
     db: &impl HirDatabase,
     file: FileId,
     mod_id: ModuleId,
-) -> WithError<()> {
+) -> WithError<FileId> {
     let mut reporter = Reporter::new(file);
     let module = db.lower_module(file, mod_id);
     let name = db.lookup_intern_name(module.name);
@@ -59,7 +59,7 @@ pub fn resolve_modules_query(
             }
 
             // add a path from file -> module.file_id
-            Ok(())
+            Ok(db.intern_file(path_buf))
         }
 
         (false, true) => {
@@ -89,7 +89,7 @@ pub fn resolve_modules_query(
                 Err(reporter.finish())
             } else {
                 // add a path from file -> module.file_id
-                Ok(())
+                Ok(db.intern_file(path_buf))
             }
         }
     }
