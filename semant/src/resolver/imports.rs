@@ -12,10 +12,7 @@ pub fn resolve_imports_query(
     let mut nodes = module_graphs.get_node(&file);
     let mut import_err = String::new();
 
-    println!("{:?}", import);
     for segment in &import.segments {
-        println!("{:?}", db.lookup_intern_name(segment.name));
-
         if let Some(module) = nodes.get(&segment.name) {
             let next_node = module_graphs.try_get_node(&module);
 
@@ -44,10 +41,6 @@ pub fn resolve_imports_query(
                 }
             }
         } else {
-            // let exports = db.resolve_exports();
-
-            println!("{:?}", segment.nested_imports);
-
             import_err.push_str(db.lookup_intern_name(segment.name).as_str());
 
             reporter.error(

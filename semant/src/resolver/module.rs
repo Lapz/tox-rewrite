@@ -65,13 +65,18 @@ pub fn resolve_modules_query(
         (false, true) => {
             let span = module.span;
 
-            reporter.error(
-                format!("Unresolved module `{}`", name),
-                "Sub-module's exist but the module file doesn't ",
-                (span.start().to_usize(), span.end().to_usize()),
-            );
+            dir.push(format!("{}.tox", name));
 
-            Err(reporter.finish())
+            if !dir.exists() {
+                reporter.error(
+                    format!("Unresolved module `{}`", name),
+                    "Sub-module's exist but the module file doesn't ",
+                    (span.start().to_usize(), span.end().to_usize()),
+                );
+                Err(reporter.finish())
+            } else {
+                Ok(db.intern_file(dir))
+            }
         }
 
         (true, true) => {
