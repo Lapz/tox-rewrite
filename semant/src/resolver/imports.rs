@@ -30,7 +30,7 @@ pub fn resolve_imports_query(
             reporter.error(
                 "Unresolved import",
                 format!(
-                    "Expected a module to be located at {}",
+                    "Couldn't find the import `{}`",
                     import_err
                 ),
                 (import.span.start().to_usize(), import.span.end().to_usize()),
