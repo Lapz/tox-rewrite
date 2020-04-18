@@ -29,8 +29,7 @@ where
     pub fn finish(
         self,
         exported: bool,
-        id: hir::Symbol,
-
+        id: hir::FunctionId,
         name: hir::NameId,
         body: Option<Vec<hir::StmtId>>,
         span: hir::Span,
@@ -464,5 +463,5 @@ pub(crate) fn lower_function_query(
 
     let name = db.intern_name(name.unwrap());
 
-    Arc::new(collector.finish(exported, hir::Symbol(fun_id, file), name, body, span))
+    Arc::new(collector.finish(exported, fun_id, name, body, span))
 }

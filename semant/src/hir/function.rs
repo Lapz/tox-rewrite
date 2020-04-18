@@ -1,6 +1,6 @@
 use super::{
-    Block, BlockId, Expr, ExprId, NameId, Param, ParamId, PatId, Pattern, Span, Stmt, StmtId,
-    Symbol, TypeParam, TypeParamId,
+    Block, BlockId, Expr, ExprId, FunctionId, NameId, Param, ParamId, PatId, Pattern, Span, Stmt,
+    StmtId, TypeParam, TypeParamId,
 };
 use indexmap::IndexMap;
 use std::collections::hash_map::DefaultHasher;
@@ -9,7 +9,7 @@ use syntax::{ast, AstPtr};
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub struct Function {
-    pub(crate) id: Symbol,
+    pub(crate) id: FunctionId,
     pub(crate) exported: bool,
     pub(crate) name: NameId,
     pub(crate) map: FunctionAstMap,

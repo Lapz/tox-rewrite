@@ -12,6 +12,7 @@ pub fn resolve_imports_query(
     let mut nodes = module_graphs.get_node(&file);
     let mut import_err = String::new();
 
+    println!("{:?}", import);
     for segment in &import.segments {
         println!("{:?}", db.lookup_intern_name(segment.name));
 
@@ -29,7 +30,6 @@ pub fn resolve_imports_query(
 
             if segment.nested_imports.len() > 0 {
                 let exports = db.resolve_exports(*module)?;
-
                 for name in &segment.nested_imports {
                     if !exports.has_export(name) {
                         reporter.error(

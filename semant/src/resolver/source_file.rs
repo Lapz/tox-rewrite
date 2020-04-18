@@ -3,7 +3,10 @@ use crate::hir;
 
 use errors::{FileId, Reporter, WithError};
 
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::Arc,
+};
 
 #[derive(Debug)]
 pub(crate) struct ResolverDataCollector<DB> {
@@ -47,28 +50,28 @@ impl FunctionData {
 pub struct FileTable {
     /// FUNCTION NAME TO FUNCTION SPAN
     symbol_level: HashMap<hir::NameId, hir::Span>,
-    symbol_exports: HashMap<hir::Symbol, bool>,
-    function_data: HashMap<hir::Symbol, FunctionData>,
+    symbol_exports: HashSet<hir::NameId>,
+    function_data: HashMap<hir::FunctionId, FunctionData>,
 }
 
 impl FileTable {
     pub fn new() -> Self {
         Self {
-            symbol_exports: HashMap::default(),
+            symbol_exports: HashSet::default(),
             symbol_level: HashMap::default(),
             function_data: HashMap::default(),
         }
     }
 
-    pub(crate) fn peek(&self, name: hir::Symbol) -> usize {
+    pub(crate) fn peek(&self, name: hir::FunctionId) -> usize {
         self.function_data[&name].peek()
     }
 
-    pub(crate) fn function_data(&self, name: hir::Symbol) -> &FunctionData {
+    pub(crate) fn function_data(&self, name: hir::FunctionId) -> &FunctionData {
         &self.function_data[&name]
     }
 
-    pub(crate) fn function_data_mut(&mut self, name: hir::Symbol) -> &mut FunctionData {
+    pub(crate) fn function_data_mut(&mut self, name: hir::FunctionId) -> &mut FunctionData {
         self.function_data.get_mut(&name).unwrap()
     }
 
@@ -76,22 +79,23 @@ impl FileTable {
         self.symbol_level.get(&id).is_some()
     }
 
+    pub fn has_export(&self, id: &hir::NameId) -> bool {
+        self.symbol_exports.get(id).is_some()
+    }
+
     pub fn get_span(&self, id: hir::NameId) -> hir::Span {
         self.symbol_level[&id]
     }
 
-    pub(crate) fn insert_name(
-        &mut self,
-        id: hir::Symbol,
-        name: hir::NameId,
-        span: hir::Span,
-        exported: bool,
-    ) {
+    pub(crate) fn insert_name(&mut self, name: hir::NameId, span: hir::Span, exported: bool) {
         self.symbol_level.insert(name, span);
-        self.symbol_exports.insert(id, exported);
+
+        if exported {
+            self.symbol_exports.insert(name);
+        }
     }
 
-    pub(crate) fn insert_function_data(&mut self, id: hir::Symbol, data: FunctionData) {
+    pub(crate) fn insert_function_data(&mut self, id: hir::FunctionId, data: FunctionData) {
         self.function_data.insert(id, data);
     }
 }
@@ -108,12 +112,12 @@ where
         self.reporter
     }
 
-    fn begin_scope(&mut self, function: hir::Symbol) {
+    fn begin_scope(&mut self, function: hir::FunctionId) {
         let data = self.table.function_data_mut(function);
         data.scopes.push(HashMap::new())
     }
 
-    fn end_scope(&mut self, function: hir::Symbol) {
+    fn end_scope(&mut self, function: hir::FunctionId) {
         let data = self.table.function_data_mut(function);
 
         let scopes = data.scopes.pop().unwrap();
@@ -126,11 +130,16 @@ where
         }
     }
 
-    fn peek(&self, function_name: hir::Symbol) -> usize {
+    fn peek(&self, function_name: hir::FunctionId) -> usize {
         self.table.peek(function_name)
     }
 
-    pub(crate) fn declare(&mut self, function: hir::Symbol, name: hir::NameId, span: hir::Span) {
+    pub(crate) fn declare(
+        &mut self,
+        function: hir::FunctionId,
+        name: hir::NameId,
+        span: hir::Span,
+    ) {
         let index = self.peek(function);
 
         if self.table.function_data(function).scopes[index].contains_key(&name) {
@@ -146,20 +155,20 @@ where
         self.table.function_data_mut(function).scopes[index].insert(name, State::Declared);
     }
 
-    pub(crate) fn define(&mut self, function: hir::Symbol, name: hir::NameId) {
+    pub(crate) fn define(&mut self, function: hir::FunctionId, name: hir::NameId) {
         let index = self.peek(function);
 
         self.table.function_data_mut(function).scopes[index].insert(name, State::Defined);
     }
 
-    pub(crate) fn not_resolved(&mut self, function: hir::Symbol, name: &hir::NameId) -> bool {
+    pub(crate) fn not_resolved(&mut self, function: hir::FunctionId, name: &hir::NameId) -> bool {
         let index = self.peek(function);
         self.table.function_data(function).scopes[index].get(name) == Some(&State::Declared)
     }
 
     pub(crate) fn define_pattern(
         &mut self,
-        function: hir::Symbol,
+        function: hir::FunctionId,
         ast_map: &hir::FunctionAstMap,
         pat_id: &hir::PatId,
     ) {
@@ -175,13 +184,14 @@ where
         }
     }
 
-    pub(crate) fn insert_function_data(&mut self, id: hir::Symbol, data: FunctionData) {
+    pub(crate) fn insert_function_data(&mut self, id: hir::FunctionId, data: FunctionData) {
         self.table.insert_function_data(id, data);
     }
 
     pub(crate) fn insert_top_level(
         &mut self,
-        id: hir::Symbol,
+        file: FileId,
+        id: hir::FunctionId,
         name: hir::NameId,
         exported: bool,
         span: hir::Span,
@@ -189,7 +199,7 @@ where
         if self.table.contains(name) {
             let name = self
                 .db
-                .lookup_intern_name(self.db.lower_function(id.1, id.0).name);
+                .lookup_intern_name(self.db.lower_function(file, id).name);
 
             self.reporter.error(
                 format!("The name `{}` is defined multiple times", name),
@@ -197,14 +207,14 @@ where
                 (span.start().to_usize(), span.end().to_usize()),
             );
         } else {
-            self.table.insert_name(id, name, span, exported);
+            self.table.insert_name(name, span, exported);
             self.insert_function_data(id, FunctionData::new());
         }
     }
 
     pub(crate) fn resolve_statement(
         &mut self,
-        function: hir::Symbol,
+        function: hir::FunctionId,
         ast_map: &hir::FunctionAstMap,
         stmt: &hir::StmtId,
     ) {
@@ -227,7 +237,7 @@ where
 
     pub(crate) fn resolve_expression(
         &mut self,
-        function: hir::Symbol,
+        function: hir::FunctionId,
         ast_map: &hir::FunctionAstMap,
         expr_id: &hir::ExprId,
     ) {
@@ -337,7 +347,7 @@ where
 
     pub(crate) fn resolve_local(
         &mut self,
-        function: hir::Symbol,
+        function: hir::FunctionId,
         name: &hir::NameId,
         is_read: bool,
         span: hir::Span,
@@ -371,7 +381,7 @@ where
 
     pub(crate) fn resolve_pattern(
         &mut self,
-        function: hir::Symbol,
+        function: hir::FunctionId,
         ast_map: &hir::FunctionAstMap,
         pat_id: &hir::PatId,
     ) {
@@ -400,7 +410,13 @@ pub fn resolve_exports_query(db: &impl HirDatabase, file: FileId) -> WithError<A
     };
 
     for function in &program.functions {
-        collector.insert_top_level(function.id, function.name, function.exported, function.span)
+        collector.insert_top_level(
+            file,
+            function.id,
+            function.name,
+            function.exported,
+            function.span,
+        )
     }
 
     if reporter.has_errors() {
@@ -420,7 +436,6 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
         table: FileTable::new(),
     };
 
-
     // collect the top level definitions first so we can
     // use forward declarations
 
@@ -429,7 +444,13 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
     }
 
     for function in &program.functions {
-        collector.insert_top_level(function.id, function.name, function.exported, function.span)
+        collector.insert_top_level(
+            file,
+            function.id,
+            function.name,
+            function.exported,
+            function.span,
+        )
     }
 
     for function in &program.functions {
