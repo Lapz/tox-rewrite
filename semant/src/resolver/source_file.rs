@@ -421,9 +421,6 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
     };
 
 
-    // send of the query 
-    let _ = db.module_graph(file)?;
-
     // collect the top level definitions first so we can
     // use forward declarations
 
