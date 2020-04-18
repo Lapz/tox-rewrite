@@ -15,7 +15,6 @@ pub use codespan_reporting::{
 
 pub use db::{FileDatabase, FileDatabaseStorage, FileId};
 pub type WithError<T> = Result<T, Vec<Diagnostic<FileId>>>;
-pub use db::MockDatabaseImpl;
 #[cfg(test)]
 mod tests {
     #[test]
