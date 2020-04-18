@@ -23,6 +23,9 @@ impl ModuleGraph {
 
             edges.insert(weight, to);
         }
+
+        self.nodes.insert(from);
+        self.nodes.insert(to);
         let _ = self.edges.entry(to).or_default();
     }
 
@@ -33,6 +36,16 @@ impl ModuleGraph {
     pub fn get_node(&self, file: &FileId) -> &HashMap<NameId, FileId> {
         &self.edges[file]
     }
+
+    pub fn merge(&mut self, other: ModuleGraph) {
+        self.nodes.extend(other.nodes.iter());
+
+        for node in other.nodes {
+            let edges = self.edges.entry(node).or_default();
+
+            edges.extend(other.edges[&node].iter())
+        }
+    }
 }
 
 pub(crate) fn module_graph_query(db: &impl HirDatabase, file: FileId) -> WithError<ModuleGraph> {
@@ -41,8 +54,13 @@ pub(crate) fn module_graph_query(db: &impl HirDatabase, file: FileId) -> WithErr
     let mut module_graph = ModuleGraph::new();
 
     for module in &program.modules {
-        module_graph.insert_edges(file, db.resolve_modules(file, module.id)?, module.name);
+        let to = db.resolve_modules(file, module.id)?;
+
+        module_graph.insert_edges(file, to, module.name);
+
+        module_graph.merge( db.module_graph(to)?)
     }
 
     Ok(module_graph)
 }
+

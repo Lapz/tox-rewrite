@@ -10,21 +10,28 @@ pub fn resolve_imports_query(
     let import = db.lower_import(file, import_id);
     let module_graphs = db.module_graph(file)?;
     let mut nodes = module_graphs.get_node(&file);
-    println!("{:?} {:#?} file {:?}", nodes, import, file);
+    let mut import_err = String::new();
+    
     for segment in &import.segments {
-        println!("{:?}", db.lookup_intern_name(segment.name));
+        
+        
         if let Some(module) = nodes.get(&segment.name) {
             let next_node = module_graphs.try_get_node(&module);
 
             let mut next_node = next_node.unwrap();
 
             std::mem::swap(&mut next_node, &mut nodes);
+
+            import_err.push_str( &format!("{}::",db.lookup_intern_name(segment.name).as_str()));
         } else {
+
+            import_err.push_str(db.lookup_intern_name(segment.name).as_str());
+         
             reporter.error(
                 "Unresolved import",
                 format!(
                     "Expected a module to be located at {}",
-                    db.lookup_intern_file(file).display()
+                    import_err
                 ),
                 (import.span.start().to_usize(), import.span.end().to_usize()),
             )

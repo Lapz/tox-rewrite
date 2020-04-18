@@ -1,4 +1,4 @@
-import foo::bar::{bar,biz};
+import foo::bar::{bar};
 import foo::Struct;
 
 

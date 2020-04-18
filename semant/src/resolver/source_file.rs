@@ -3,7 +3,6 @@ use crate::hir;
 
 use errors::{FileId, Reporter, WithError};
 
-use super::module_graph::ModuleGraph;
 use std::{collections::HashMap, sync::Arc};
 
 #[derive(Debug)]
@@ -421,6 +420,8 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
         table: FileTable::new(),
     };
 
+
+    // send of the query 
     let _ = db.module_graph(file)?;
 
     // collect the top level definitions first so we can

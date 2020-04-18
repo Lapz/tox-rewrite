@@ -61,6 +61,10 @@ impl Name {
     pub fn missing() -> Self {
         Name(SmolStr::new("missing name"))
     }
+
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
 }
 
 impl std::fmt::Display for Name {
