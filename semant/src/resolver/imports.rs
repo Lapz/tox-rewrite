@@ -11,10 +11,10 @@ pub fn resolve_imports_query(
     let module_graphs = db.module_graph(file)?;
     let mut nodes = module_graphs.get_node(&file);
     let mut import_err = String::new();
-    
+
     for segment in &import.segments {
-        
-        
+        println!("{:?}", db.lookup_intern_name(segment.name));
+
         if let Some(module) = nodes.get(&segment.name) {
             let next_node = module_graphs.try_get_node(&module);
 
@@ -22,17 +22,37 @@ pub fn resolve_imports_query(
 
             std::mem::swap(&mut next_node, &mut nodes);
 
-            import_err.push_str( &format!("{}::",db.lookup_intern_name(segment.name).as_str()));
+            import_err.push_str(&format!(
+                "{}::",
+                db.lookup_intern_name(segment.name).as_str()
+            ));
+
+            if segment.nested_imports.len() > 0 {
+                let exports = db.resolve_exports(*module)?;
+
+                for name in &segment.nested_imports {
+                    if !exports.has_export(name) {
+                        reporter.error(
+                            "Unresolved import",
+                            format!(
+                                "Couldn't find the import `{}`",
+                                format!("{}{}", import_err, db.lookup_intern_name(*name))
+                            ),
+                            (import.span.start().to_usize(), import.span.end().to_usize()),
+                        );
+                    }
+                }
+            }
         } else {
+            // let exports = db.resolve_exports();
+
+            println!("{:?}", segment.nested_imports);
 
             import_err.push_str(db.lookup_intern_name(segment.name).as_str());
-         
+
             reporter.error(
                 "Unresolved import",
-                format!(
-                    "Couldn't find the import `{}`",
-                    import_err
-                ),
+                format!("Couldn't find the import `{}`", import_err),
                 (import.span.start().to_usize(), import.span.end().to_usize()),
             )
         }

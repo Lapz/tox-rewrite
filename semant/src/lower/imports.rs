@@ -26,6 +26,16 @@ pub(crate) fn lower_import_query(
         });
     }
 
+    if import.segments().count() > 1 {
+        // only when we have import foo::something
+        // get the last import
+        assert!(segments.len() > 1);
+        let actual_import = segments.pop().unwrap();
+        let index = segments.len() - 1;
+
+        segments[index].nested_imports.push(actual_import.name);
+    }
+
     if let Some(list) = import.import_list() {
         let index = segments.len() - 1;
         let last = &mut segments[index];
