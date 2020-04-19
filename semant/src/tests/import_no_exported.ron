@@ -6,7 +6,7 @@ DirectoryStructure (
         ),
         (
             name:"foo.tox",
-            text: "export fn bar() {}"
+            text: "fn bar() {}"
         )
     ]
 )

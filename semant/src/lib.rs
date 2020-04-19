@@ -16,7 +16,17 @@ pub use db::{HirDatabase, HirDatabaseStorage, InternDatabaseStorage};
 
 #[macro_export]
 macro_rules! create_test {
-    ($filename:ident) => {
+    ($filename:ident ,is_err) => {
+        $crate::__create_test!($filename, is_err);
+    };
+    ($filename:ident ) => {
+        $crate::__create_test!($filename, is_ok);
+    };
+}
+
+#[macro_export]
+macro_rules! __create_test {
+    ($filename:ident,$kind:ident) => {
         #[test]
         fn $filename() -> std::io::Result<()> {
             use crate::HirDatabase;
@@ -44,7 +54,7 @@ macro_rules! create_test {
                 Err(errors) => println!("{:?}", errors),
             }
 
-            assert!(db.resolve_source_file(handle).is_ok());
+            assert!(db.resolve_source_file(handle).$kind());
             Ok(())
         }
     };

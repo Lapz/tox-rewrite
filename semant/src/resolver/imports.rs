@@ -12,7 +12,7 @@ pub fn resolve_imports_query(
     let mut nodes = module_graphs.get_node(&file);
     let mut import_err = String::new();
 
-    println!("{:?}", import);
+    println!("{:?}", module_graphs);
     for segment in &import.segments {
         if let Some(module) = nodes.get(&segment.name) {
             let next_node = module_graphs.try_get_node(&module);
@@ -68,8 +68,11 @@ mod test {
     create_test!(import_single);
     create_test!(import_many);
 
-    #[should_panic]
-    create_test!(import_no_exported);
+    create_test!(import_no_exported, is_err);
 
-    // create_test!(import_deep);
+    create_test!(import_dir_and_file, is_err);
+
+    create_test!(import_deep);
+
+    create_test!(import_deep_dirs);
 }

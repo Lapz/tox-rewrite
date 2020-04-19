@@ -61,5 +61,7 @@ pub(crate) fn module_graph_query(db: &impl HirDatabase, file: FileId) -> WithErr
         module_graph.merge(db.module_graph(to)?)
     }
 
+    println!("{:?}", module_graph);
+
     Ok(module_graph)
 }

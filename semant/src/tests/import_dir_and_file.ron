@@ -6,16 +6,16 @@ DirectoryStructure (
         ),
         (
             name:"foo.tox",
-            text: "mod bar; export fn bar() {}  export fn baz() {}"
+            text: "mod foo; export fn bar() {}  export fn baz() {}"
         ),
         (
-            name:"bar",
+            name:"foo",
             kind: Dir,
             contents: Some(
                 DirectoryStructure(
                     contents:[
                         (
-                        name:"bar.tox",
+                        name:"foo.tox",
                         text: "export fn bar() {}"
                         )
                     ]
