@@ -57,3 +57,18 @@ pub fn resolve_imports_query(
         Ok(())
     }
 }
+
+#[cfg(test)]
+#[macro_use]
+mod test {
+
+    use crate::create_test;
+
+    create_test!(import_single);
+    create_test!(import_many);
+
+    #[should_panic]
+    create_test!(import_no_exported);
+
+    create_test!(import_deep);
+}

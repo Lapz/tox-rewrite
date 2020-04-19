@@ -4,7 +4,6 @@ use parser::ParseDatabase;
 
 use std::sync::Arc;
 use syntax::ast;
-
 #[salsa::query_group(InternDatabaseStorage)]
 pub trait InternDatabase {
     #[salsa::interned]

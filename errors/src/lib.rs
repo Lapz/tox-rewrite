@@ -15,10 +15,3 @@ pub use codespan_reporting::{
 
 pub use db::{FileDatabase, FileDatabaseStorage, FileId};
 pub type WithError<T> = Result<T, Vec<Diagnostic<FileId>>>;
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
