@@ -82,15 +82,6 @@ pub fn resolve_modules_query(
         (true, true) => {
             dir.push(format!("{}.tox", name));
 
-            println!("herw");
-
-            println!(
-                "p:{} m:{} dir:{}",
-                path_buf.display(),
-                db.lookup_intern_file(module.file).display(),
-                dir.display()
-            );
-
             // module exists and is the same as the one its being decleared in
             // check its children and report an err if its not found
             if path_buf == db.lookup_intern_file(module.file) && !dir.exists() {
@@ -102,8 +93,12 @@ pub fn resolve_modules_query(
 
                 Err(reporter.finish())
             } else {
+                if dir.exists() {
+                    Ok(db.intern_file(dir))
+                } else {
+                    Ok(db.intern_file(path_buf))
+                }
                 // add a path from file -> module.file_id
-                Ok(db.intern_file(path_buf))
             }
         }
     }
