@@ -1,4 +1,4 @@
-use crate::{hir, resolver::FileTable, resolver::ModuleGraph};
+use crate::{hir, infer::Ctx, resolver::FileTable, resolver::ModuleGraph};
 use errors::{FileId, WithError};
 use parser::ParseDatabase;
 
@@ -56,4 +56,6 @@ pub trait HirDatabase: std::fmt::Debug + InternDatabase + ParseDatabase {
     fn resolve_import(&self, file: FileId, import: hir::ImportId) -> WithError<()>;
     #[salsa::invoke(crate::resolver::module_graph_query)]
     fn module_graph(&self, file: FileId) -> WithError<ModuleGraph>;
+    #[salsa::invoke(crate::infer::context_query)]
+    fn context(&self, file: FileId) -> WithError<Ctx>;
 }

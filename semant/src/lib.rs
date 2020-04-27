@@ -1,7 +1,7 @@
 // mod ctx;
 mod db;
 mod hir;
-// mod infer;
+mod infer;
 mod lower;
 #[macro_use]
 mod resolver;

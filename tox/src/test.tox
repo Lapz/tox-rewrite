@@ -1,10 +1,6 @@
 import foo::bar::{bar};
-import foo::Struct;
-
 
 mod foo; 
-
-
 
 type ParserResult<T> = Result<T,i32>;
 

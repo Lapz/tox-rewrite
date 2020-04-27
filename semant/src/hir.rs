@@ -65,6 +65,10 @@ impl Name {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
     }
+
+    pub fn new<T: AsRef<str> + Into<String>>(s: T) -> Self {
+        Name(SmolStr::new(s))
+    }
 }
 
 impl std::fmt::Display for Name {
