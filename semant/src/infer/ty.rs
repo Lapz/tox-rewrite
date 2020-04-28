@@ -1,31 +1,32 @@
 use crate::hir::NameId;
 
 /// A type var represent a variable that could be a type
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub(crate) struct TypeVar(pub(crate) u32);
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TypeVar(pub(crate) u32);
 /// A unique identifier that is used to distinguish to types with the exact some fields
 /// i.e struct Foo {} && struct Bar {} we treat them differently
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub(crate) struct Unique(pub(crate) u32);
+pub struct Unique(pub(crate) u32);
 
-#[derive(Debug, Clone, PartialEq)]
-pub(crate) enum TypeCon {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TypeCon {
     Bool,
     Float,
     Int,
     Str,
     Void,
-    Array(Box<TypeCon>),
+    Array { ty: Box<Type>, size: Option<usize> },
 }
 
 /// All of of our base types
 ///
-#[derive(Debug, Clone, PartialEq)]
-pub(crate) enum Type {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Type {
     /// (x |-> y)
     /// Last type in a app is the return
     /// type of i32 => App(Con(Int))
     App(Vec<Type>),
+    Tuple(Vec<Type>),
     Poly(Vec<TypeVar>, Box<Type>),
     Var(TypeVar),
     Con(TypeCon),
@@ -40,8 +41,8 @@ pub(crate) enum Type {
 ///  }
 /// ```
 
-#[derive(Debug, Clone, PartialEq)]
-pub(crate) struct EnumVariant {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EnumVariant {
     pub tag: u32,
     pub inner: Option<Type>,
 }

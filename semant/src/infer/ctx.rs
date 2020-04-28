@@ -1,10 +1,11 @@
 use super::stacked_map::StackedMap;
 use crate::{
+    db::HirDatabase,
     hir::{Name, NameId},
     infer::ty::{EnumVariant, Type, TypeCon, TypeVar},
-    HirDatabase,
 };
 use errors::{FileId, WithError};
+use std::sync::{Arc, RwLock};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Ctx {
@@ -52,13 +53,22 @@ impl Ctx {
 
         tv
     }
-}
 
-pub fn context_query(db: &impl HirDatabase, file: FileId) -> WithError<Ctx> {
-    let program = db.lower(file)?;
+    pub(crate) fn begin_scope(&mut self) {
+        self.types.begin_scope();
+    }
 
-    let mut ctx = Ctx::new(db);
+    pub(crate) fn end_scope(&mut self) {
+        self.types.end_scope();
+    }
 
-    for alias in &program.type_alias {}
-    unimplemented!()
+    pub(crate) fn get_type(&mut self, name: NameId) -> Option<Type> {
+        // self.types.get(name)
+
+        unimplemented!()
+    }
+
+    pub(crate) fn insert_type(&mut self, name: NameId, ty: Type) {
+        self.types.insert(name, ty)
+    }
 }

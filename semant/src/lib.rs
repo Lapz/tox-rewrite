@@ -12,7 +12,8 @@ mod resolver;
 mod tests;
 // mod util;
 
-pub use db::{HirDatabase, HirDatabaseStorage, InternDatabaseStorage};
+pub use db::{HirDatabase, HirDatabaseStorage, InternDatabaseStorage, TypeCtx};
+pub use infer::Ctx;
 
 #[macro_export]
 macro_rules! create_test {
