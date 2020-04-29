@@ -115,8 +115,6 @@ mod test {
 
         create_structure(&dir.path(), &structure, &mut file_names)?;
 
-        println!("{:?}", file_names);
-
         use walkdir::WalkDir;
 
         for entry in WalkDir::new(dir.path()) {

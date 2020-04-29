@@ -3,6 +3,7 @@ mod db;
 mod hir;
 mod infer;
 mod lower;
+mod util;
 #[macro_use]
 mod resolver;
 // mod ty;
@@ -45,7 +46,6 @@ macro_rules! __create_test {
 
             crate::tests::create_structure(&dir.path(), &structure, &mut file_names)?;
 
-            println!("{:?}", file_names);
             let db = crate::tests::MockDatabaseImpl::default();
 
             let handle = db.intern_file(file_names.remove(0));

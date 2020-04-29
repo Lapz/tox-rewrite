@@ -1,1 +1,30 @@
+use std::hash::Hash;
+use syntax::{TextRange, TextUnit};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Span<T> {
+    pub value: T,
+    pub start: TextUnit,
+    pub end: TextUnit,
+}
+
+impl<T> Span<T>
+where
+    T: std::fmt::Debug + Clone + Hash,
+{
+    pub fn new(value: T, range: TextRange) -> Self {
+        Self {
+            value,
+            start: range.start(),
+            end: range.end(),
+        }
+    }
+
+    pub fn start(&self) -> TextUnit {
+        self.start
+    }
+
+    pub fn end(&self) -> TextUnit {
+        self.end
+    }
+}

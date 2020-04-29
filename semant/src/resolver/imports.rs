@@ -12,7 +12,6 @@ pub fn resolve_imports_query(
     let mut nodes = module_graphs.get_node(&file);
     let mut import_err = String::new();
 
-    println!("{:?}", module_graphs);
     for segment in &import.segments {
         if let Some(module) = nodes.get(&segment.name) {
             let next_node = module_graphs.try_get_node(&module);

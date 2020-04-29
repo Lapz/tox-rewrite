@@ -56,7 +56,7 @@ pub(crate) fn module_graph_query(db: &impl HirDatabase, file: FileId) -> WithErr
     for module in &program.modules {
         let to = db.resolve_modules(file, module.id)?;
 
-        module_graph.insert_edges(file, to, module.name);
+        module_graph.insert_edges(file, to, module.name.value);
 
         module_graph.merge(db.module_graph(to)?)
     }

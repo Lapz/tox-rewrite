@@ -46,12 +46,12 @@ pub(crate) fn transform_type(
             Ok(infer::Type::App(signature))
         }
         hir::Type::Ident(name) => {
-            //  Ok(infer::Type::Con(infer::TypeCon::Int))
+            Ok(infer::Type::Con(infer::TypeCon::Int))
 
             // if let Some(ty) =
 
             // let msg =
-            unimplemented!()
+            // unimplemented!()
         }
     }
 }

@@ -2,6 +2,7 @@ pub(crate) mod function;
 
 pub(crate) use function::{Function, FunctionAstMap};
 
+use crate::util;
 use errors::FileId;
 use std::{path::Path, sync::Arc};
 use syntax::{ast, text_of_first_token, AstNode, SmolStr, SyntaxKind, TextRange, T};
@@ -123,7 +124,7 @@ pub struct TypeAlias {
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Module {
     pub(crate) id: ModuleId,
-    pub(crate) name: NameId,
+    pub(crate) name: util::Span<NameId>,
     pub(crate) file: FileId,
     pub(crate) span: Span,
 }
