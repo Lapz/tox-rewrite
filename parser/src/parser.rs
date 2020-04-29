@@ -408,7 +408,7 @@ fn n_attached_trivias<'a>(
 ) -> usize {
     use SyntaxKind::*;
     match kind {
-        TYPE_ALIAS_DEF | CLASS_DEF | ENUM_DEF | ENUM_VARIANT | FN_DEF => {
+        TYPE_ALIAS_DEF | CLASS_DEF | ENUM_DEF | ENUM_VARIANT | FN_DEF | MOD_DEF | IMPORT_DEF => {
             let mut res = 0;
             for (i, (kind, text)) in trivias.enumerate() {
                 match kind {
