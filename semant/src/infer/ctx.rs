@@ -62,10 +62,8 @@ impl Ctx {
         self.types.end_scope();
     }
 
-    pub(crate) fn get_type(&mut self, name: NameId) -> Option<Type> {
-        // self.types.get(name)
-
-        unimplemented!()
+    pub(crate) fn get_type(&mut self, name: &NameId) -> Option<Type> {
+        self.types.get(name).map(Clone::clone)
     }
 
     pub(crate) fn insert_type(&mut self, name: NameId, ty: Type) {

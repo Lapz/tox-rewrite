@@ -99,4 +99,4 @@ SOURCE_FILE@[0; 128)
 "mod baz;\n"
 ModuleGraph { nodes: {}, edges: {} }
 "mod bar;\n\n"
-ModuleGraph { nodes: {FileId(1), FileId(2)}, edges: {FileId(2): {NameId(1): FileId(1)}, FileId(1): {}} }
+ModuleGraph { nodes: {FileId(2), FileId(1)}, edges: {FileId(2): {NameId(1): FileId(1)}, FileId(1): {}} }
