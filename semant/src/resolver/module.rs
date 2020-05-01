@@ -21,9 +21,9 @@ pub fn resolve_modules_query(
 ) -> WithError<FileId> {
     let mut reporter = Reporter::new(file);
     let module = db.lower_module(file, mod_id);
-    let name = db.lookup_intern_name(module.name.value);
+    let name = db.lookup_intern_name(module.name.item);
 
-    let span = module.span;
+    let span = (module.span.start().to_usize(), module.span.end().to_usize());
 
     let mut path_buf = db.lookup_intern_file(module.file);
     path_buf.pop();
@@ -38,11 +38,7 @@ pub fn resolve_modules_query(
 
     match (file_exists, dir_exists) {
         (false, false) => {
-            reporter.error(
-                format!("Unresolved module `{}`", name),
-                "",
-                (span.start().to_usize(), span.end().to_usize()),
-            );
+            reporter.error(format!("Unresolved module `{}`", name), "", span);
 
             Err(reporter.finish())
         }
@@ -52,7 +48,7 @@ pub fn resolve_modules_query(
                 reporter.error(
                     format!("Unresolved module `{}`", name),
                     format!("Sub-module folder for `{}` is missing", name),
-                    (span.start().to_usize(), span.end().to_usize()),
+                    span,
                 );
 
                 return Err(reporter.finish());
@@ -63,15 +59,13 @@ pub fn resolve_modules_query(
         }
 
         (false, true) => {
-            let span = module.span;
-
             dir.push(format!("{}.tox", name));
 
             if !dir.exists() {
                 reporter.error(
                     format!("Unresolved module `{}`", name),
                     "Sub-module's exist but the module file doesn't ",
-                    (span.start().to_usize(), span.end().to_usize()),
+                    span,
                 );
                 Err(reporter.finish())
             } else {
@@ -85,11 +79,7 @@ pub fn resolve_modules_query(
             // module exists and is the same as the one its being decleared in
             // check its children and report an err if its not found
             if path_buf == db.lookup_intern_file(module.file) && !dir.exists() {
-                reporter.error(
-                    format!("Unresolved module `{}`", name),
-                    "",
-                    (span.start().to_usize(), span.end().to_usize()),
-                );
+                reporter.error(format!("Unresolved module `{}`", name), "", span);
 
                 Err(reporter.finish())
             } else {
@@ -101,7 +91,7 @@ pub fn resolve_modules_query(
                             dir.display(),
                             path_buf.display(),
                         ),
-                        (span.start().to_usize(), span.end().to_usize()),
+                        span
                     );
 
                     Err(reporter.finish())
