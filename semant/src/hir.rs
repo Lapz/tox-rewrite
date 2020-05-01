@@ -1,6 +1,6 @@
 pub(crate) mod function;
 
-pub(crate) use function::{Function, FunctionAstMap};
+pub(crate) use function::FunctionAstMap;
 
 use crate::util;
 use errors::FileId;
@@ -45,6 +45,18 @@ pub struct Import {
 pub struct Segment {
     pub(crate) name: NameId,
     pub(crate) nested_imports: Vec<NameId>,
+}
+
+#[derive(Debug, Eq, PartialEq, Hash)]
+pub struct Function {
+    pub(crate) id: FunctionId,
+    pub(crate) exported: bool,
+    pub(crate) name: util::Span<NameId>,
+    pub(crate) map: FunctionAstMap,
+    pub(crate) params: Vec<util::Span<ParamId>>,
+    pub(crate) type_params: Vec<util::Span<TypeParamId>>,
+    pub(crate) body: Option<Vec<StmtId>>,
+    pub(crate) span: Span,
 }
 /// A symbol is composed of a name and the file it belongs to
 /// Symbols with the same name but from different files are not the sames
@@ -104,8 +116,8 @@ impl AsRef<Path> for Name {
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Param {
-    pub(crate) pat: PatId,
-    pub(crate) ty: TypeId,
+    pub(crate) pat: util::Span<PatId>,
+    pub(crate) ty: util::Span<TypeId>,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -139,13 +151,13 @@ pub struct BlockId(pub(crate) u64);
 pub enum Pattern {
     Bind { name: NameId },
     Placeholder,
-    Tuple(Vec<PatId>),
+    Tuple(Vec<util::Span<PatId>>),
     Literal(LiteralId),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct MatchArm {
-    pub(crate) pats: Vec<PatId>,
+    pub(crate) pats: Vec<util::Span<PatId>>,
     pub(crate) expr: ExprId,
 }
 #[derive(Debug, Hash, Clone, PartialEq, Eq)]
@@ -177,7 +189,7 @@ pub enum Type {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum Stmt {
     Let {
-        pat: PatId,
+        pat: util::Span<PatId>,
         initializer: Option<ExprId>,
     },
     Expr(ExprId),
@@ -202,7 +214,7 @@ pub enum Expr {
     },
     Cast {
         expr: ExprId,
-        ty: TypeId,
+        ty: util::Span<TypeId>,
     },
     Continue,
     If {
@@ -338,5 +350,15 @@ impl Literal {
             T![nil] => Literal::Nil,
             _ => unreachable!(),
         }
+    }
+}
+
+impl Function {
+    pub(crate) fn body(&self) -> &Option<Vec<StmtId>> {
+        &self.body
+    }
+
+    pub(crate) fn map(&self) -> &FunctionAstMap {
+        &self.map
     }
 }

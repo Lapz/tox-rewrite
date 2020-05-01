@@ -1,24 +1,11 @@
 use super::{
-    Block, BlockId, Expr, ExprId, FunctionId, NameId, Param, ParamId, PatId, Pattern, Span, Stmt,
-    StmtId, TypeParam, TypeParamId,
+    Block, BlockId, Expr, ExprId, Param, ParamId, PatId, Pattern, Span, Stmt, StmtId, TypeParam,
+    TypeParamId,
 };
 use indexmap::IndexMap;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use syntax::{ast, AstPtr};
-
-#[derive(Debug, Eq, PartialEq, Hash)]
-pub struct Function {
-    pub(crate) id: FunctionId,
-    pub(crate) exported: bool,
-    pub(crate) name: NameId,
-    pub(crate) map: FunctionAstMap,
-    pub(crate) params: Vec<ParamId>,
-    pub(crate) type_params: Vec<TypeParamId>,
-    pub(crate) body: Option<Vec<StmtId>>,
-    pub(crate) span: Span,
-}
-
 #[derive(Debug, Default, Eq, PartialEq, Clone)]
 pub(crate) struct FunctionAstMap {
     ast_to_pattern: IndexMap<PatId, AstPtr<ast::Pat>>,
@@ -156,15 +143,5 @@ impl Hash for FunctionAstMap {
             self.hir_to_block,
             self.ast_to_block
         )
-    }
-}
-
-impl Function {
-    pub(crate) fn body(&self) -> &Option<Vec<StmtId>> {
-        &self.body
-    }
-
-    pub(crate) fn map(&self) -> &FunctionAstMap {
-        &self.map
     }
 }

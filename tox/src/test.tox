@@ -3,10 +3,21 @@ import foo::bar::{bar};
 
 mod bar;
 mod foo;
-mod baz;
-mod baz;
+
 type ParserResult<T> = Result<T,i32>;
 
+
+export fn main() {
+    let x= 10;
+    let x =10;
+    let x =x;
+    v=10;
+
+    for(let i=0;i<10;i+=1) {
+        print("ok");
+    };
+    if true {print("good")} else {print("bad")};
+}
 
 export fn main() {
     

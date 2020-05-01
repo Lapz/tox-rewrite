@@ -1,5 +1,5 @@
 use crate::db::HirDatabase;
-use crate::hir::{self};
+use crate::{hir, util, TextRange};
 use errors::FileId;
 use std::sync::Arc;
 
@@ -18,8 +18,8 @@ pub(crate) struct FunctionDataCollector<DB> {
     block_id_count: u64,
     pat_id_count: u64,
     ast_map: hir::FunctionAstMap,
-    params: Vec<hir::ParamId>, // expressions: HashMap<hir::ExprId, hir::Expr>,
-    type_params: Vec<hir::TypeParamId>,
+    params: Vec<util::Span<hir::ParamId>>, // expressions: HashMap<hir::ExprId, hir::Expr>,
+    type_params: Vec<util::Span<hir::TypeParamId>>,
 }
 
 impl<'a, DB> FunctionDataCollector<&'a DB>
@@ -30,14 +30,14 @@ where
         self,
         exported: bool,
         id: hir::FunctionId,
-        name: hir::NameId,
+        name: util::Span<hir::NameId>,
         body: Option<Vec<hir::StmtId>>,
-        span: hir::Span,
+        span: TextRange,
     ) -> hir::Function {
         let params = self.params;
         let type_params = self.type_params;
         let map = self.ast_map;
-        hir::function::Function {
+        hir::Function {
             id,
             exported,
             name,
@@ -58,16 +58,16 @@ where
 
         self.ast_map.insert_param(id, param, AstPtr::new(ast_node));
 
-        self.params.push(id);
+        self.params.push(util::Span::from_ast(id, ast_node));
     }
 
-    fn add_pat(&mut self, ast_node: &ast::Pat, pat: hir::Pattern) -> hir::PatId {
+    fn add_pat(&mut self, ast_node: &ast::Pat, pat: hir::Pattern) -> util::Span<hir::PatId> {
         let current = self.pat_id_count;
         self.pat_id_count += 1;
         let id = hir::PatId(current);
         self.ast_map.insert_pat(id, pat, AstPtr::new(ast_node));
 
-        id
+        util::Span::from_ast(id, ast_node)
     }
 
     pub fn add_stmt(&mut self, ast_node: &ast::Stmt, stmt: hir::Stmt) -> hir::StmtId {
@@ -135,7 +135,7 @@ where
             .insert_type_param(id, type_param, AstPtr::new(ast_node));
     }
 
-    pub(crate) fn lower_pattern(&mut self, pat: ast::Pat) -> hir::PatId {
+    pub(crate) fn lower_pattern(&mut self, pat: ast::Pat) -> util::Span<hir::PatId> {
         let pattern = match &pat {
             ast::Pat::BindPat(binding) => {
                 let name = self.db.intern_name(
@@ -175,8 +175,8 @@ where
         self.add_type_param(&type_param, hir::TypeParam { name });
     }
 
-    pub(crate) fn lower_type(&mut self, ty: ast::TypeRef) -> hir::TypeId {
-        match ty {
+    pub(crate) fn lower_type(&mut self, ty: ast::TypeRef) -> util::Span<hir::TypeId> {
+        let id = match ty {
             ast::TypeRef::ParenType(paren_ty) => {
                 let mut types = Vec::new();
 
@@ -211,7 +211,9 @@ where
 
                 self.db.intern_type(hir::Type::FnType { params, ret })
             }
-        }
+        };
+
+        util::Span::from_ast(id, &ty)
     }
 
     pub fn lower_stmt(&mut self, node: ast::Stmt) -> hir::StmtId {
@@ -461,7 +463,7 @@ pub(crate) fn lower_function_query(
 
     let span = function.syntax().text_range();
 
-    let name = db.intern_name(name.unwrap());
+    let name = util::Span::from_ast(db.intern_name(name.unwrap()), &function.name().unwrap());
 
     Arc::new(collector.finish(exported, fun_id, name, body, span))
 }
