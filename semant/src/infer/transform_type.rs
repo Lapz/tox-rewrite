@@ -20,25 +20,25 @@ pub(crate) fn transform_type(
             let mut signature = vec![];
 
             for id in &types {
-                signature.push(transform_type(db, file, *id, ctx)?)
+                signature.push(transform_type(db, file, id.item, ctx)?)
             }
 
             Ok(infer::Type::Tuple(signature))
         }
 
         hir::Type::ArrayType { ty, size } => Ok(infer::Type::Con(infer::TypeCon::Array {
-            ty: Box::new(transform_type(db, file, ty, ctx)?),
+            ty: Box::new(transform_type(db, file, ty.item, ctx)?),
             size,
         })),
         hir::Type::FnType { params, ret } => {
             let mut signature = vec![];
 
             for id in &params {
-                signature.push(transform_type(db, file, *id, ctx)?)
+                signature.push(transform_type(db, file, id.item, ctx)?)
             }
 
             if let Some(returns) = ret {
-                signature.push(transform_type(db, file, returns, ctx)?)
+                signature.push(transform_type(db, file, returns.item, ctx)?)
             } else {
                 signature.push(infer::Type::Con(infer::TypeCon::Void))
             }

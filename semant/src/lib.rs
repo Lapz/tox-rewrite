@@ -15,6 +15,7 @@ mod tests;
 
 pub use db::{HirDatabase, HirDatabaseStorage, InternDatabaseStorage, TypeCtx};
 pub use infer::Ctx;
+pub use syntax::TextRange;
 
 #[macro_export]
 macro_rules! create_test {

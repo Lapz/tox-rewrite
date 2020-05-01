@@ -17,8 +17,8 @@ pub fn infer_alias(
         .map(|_| ctx.type_var())
         .collect::<Vec<_>>();
 
-    let ty = transform_type(db, file, alias.ty, ctx)?;
+    let ty = transform_type(db, file, alias.ty.item, ctx)?;
 
-    ctx.insert_type(name, Type::Poly(poly_tvs, Box::new(ty)));
+    ctx.insert_type(name.item, Type::Poly(poly_tvs, Box::new(ty)));
     Ok(())
 }

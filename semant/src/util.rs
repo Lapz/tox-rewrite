@@ -1,5 +1,5 @@
 use std::hash::Hash;
-use syntax::{TextRange, TextUnit};
+use syntax::{AstNode, TextRange, TextUnit};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Span<T> {
@@ -14,6 +14,15 @@ where
 {
     pub fn new(item: T, range: TextRange) -> Self {
         Self {
+            item,
+            start: range.start(),
+            end: range.end(),
+        }
+    }
+
+    pub fn from_ast<N: AstNode>(item: T, node: &N) -> Self {
+        let range = node.syntax().text_range();
+        Span {
             item,
             start: range.start(),
             end: range.end(),

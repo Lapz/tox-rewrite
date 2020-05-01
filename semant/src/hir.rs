@@ -115,9 +115,9 @@ pub struct TypeParam {
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub struct TypeAlias {
-    pub(crate) name: NameId,
-    pub(crate) type_params: Vec<TypeParamId>,
-    pub(crate) ty: TypeId,
+    pub(crate) name: util::Span<NameId>,
+    pub(crate) type_params: Vec<util::Span<TypeParamId>>,
+    pub(crate) ty: util::Span<TypeId>,
     pub(crate) span: Span,
 }
 
@@ -160,16 +160,16 @@ pub enum Literal {
 
 #[derive(Debug, Hash, Clone, PartialEq, Eq)]
 pub enum Type {
-    ParenType(Vec<TypeId>),
+    ParenType(Vec<util::Span<TypeId>>),
     /// An array type with no supplied size is assumed to be dynamic in growth
     /// If the size is present the array has a static size
     ArrayType {
-        ty: TypeId,
+        ty: util::Span<TypeId>,
         size: Option<usize>,
     },
     FnType {
-        params: Vec<TypeId>,
-        ret: Option<TypeId>,
+        params: Vec<util::Span<TypeId>>,
+        ret: Option<util::Span<TypeId>>,
     },
     Ident(NameId),
 }

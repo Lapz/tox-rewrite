@@ -1,5 +1,5 @@
 use crate::db::HirDatabase;
-use crate::hir;
+use crate::{hir, util};
 
 use std::sync::Arc;
 
@@ -8,7 +8,7 @@ use syntax::{ast, AstNode, AstPtr, NameOwner, TypeParamsOwner, TypesOwner};
 pub(crate) struct TypeAliasDataCollector<DB> {
     db: DB,
     type_param_count: u64,
-    type_params: Vec<hir::TypeParamId>,
+    type_params: Vec<util::Span<hir::TypeParamId>>,
     ast_map: hir::FunctionAstMap,
 }
 
@@ -16,10 +16,15 @@ impl<'a, DB> TypeAliasDataCollector<&'a DB>
 where
     DB: HirDatabase,
 {
-    pub fn finish(self, name: hir::Name, span: hir::Span, ty: hir::TypeId) -> hir::TypeAlias {
+    pub fn finish(
+        self,
+        name: util::Span<hir::NameId>,
+        span: crate::TextRange,
+        ty: util::Span<hir::TypeId>,
+    ) -> hir::TypeAlias {
         let type_params = self.type_params;
         hir::TypeAlias {
-            name: self.db.intern_name(name),
+            name,
             type_params,
             span,
             ty,
@@ -42,8 +47,8 @@ where
             .insert_type_param(id, type_param, AstPtr::new(ast_node));
     }
 
-    pub(crate) fn lower_type(&mut self, ty: ast::TypeRef) -> hir::TypeId {
-        match ty {
+    pub(crate) fn lower_type(&mut self, ty: ast::TypeRef) -> util::Span<hir::TypeId> {
+        let id = match ty {
             ast::TypeRef::ParenType(paren_ty) => {
                 let mut types = Vec::new();
 
@@ -78,7 +83,9 @@ where
 
                 self.db.intern_type(hir::Type::FnType { params, ret })
             }
-        }
+        };
+
+        util::Span::from_ast(id, &ty)
     }
 }
 pub(crate) fn lower_type_alias_query(
@@ -86,7 +93,10 @@ pub(crate) fn lower_type_alias_query(
     alias_id: hir::TypeAliasId,
 ) -> Arc<hir::TypeAlias> {
     let alias = db.lookup_intern_type_alias(alias_id);
-    let name = alias.name().unwrap().into();
+    let name = util::Span::from_ast(
+        db.intern_name(alias.name().unwrap().into()),
+        &alias.name().unwrap(),
+    );
     let mut collector = TypeAliasDataCollector {
         db,
         type_params: Vec::new(),
