@@ -1,5 +1,5 @@
 ---
-created: "2020-03-03T19:30:54.591194Z"
+created: "2020-05-02T10:11:44.367621Z"
 creator: insta@0.8.2
 source: parser/src/parser/expressions/record_expr.rs
 expression: "crate::utils::dump_debug(&parser_output)"
@@ -10,15 +10,15 @@ SOURCE_FILE@[0; 71)
     WHITESPACE@[2; 3) " "
     NAME@[3; 7)
       IDENT@[3; 7) "main"
-    PARAM_LIST@[7; 10)
+    PARAM_LIST@[7; 9)
       L_PAREN@[7; 8) "("
       R_PAREN@[8; 9) ")"
-      WHITESPACE@[9; 10) " "
+    WHITESPACE@[9; 10) " "
     BLOCK_EXPR@[10; 71)
       BLOCK@[10; 71)
         L_CURLY@[10; 11) "{"
         WHITESPACE@[11; 12) " "
-        EXPR_STMT@[12; 69)
+        EXPR_STMT@[12; 70)
           RECORD_LITERAL_EXPR@[12; 69)
             IDENT_EXPR@[12; 15)
               NAME@[12; 15)
@@ -47,6 +47,6 @@ SOURCE_FILE@[0; 71)
                   NAME@[57; 68)
                     IDENT@[57; 68) "longymclong"
               R_CURLY@[68; 69) "}"
-        SEMI@[69; 70) ";"
+          SEMI@[69; 70) ";"
         R_CURLY@[70; 71) "}"
 
