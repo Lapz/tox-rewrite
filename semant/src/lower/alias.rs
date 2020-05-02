@@ -65,7 +65,13 @@ where
                 self.db.intern_type(hir::Type::ArrayType { ty, size: None })
             }
             ast::TypeRef::IdentType(ident_ty) => {
+                let type_params = ident_ty.type_params();
+
                 let name: hir::Name = ident_ty.into();
+
+                if type_params.is_some() {
+                    println!("it works");
+                }
 
                 self.db
                     .intern_type(hir::Type::Ident(self.db.intern_name(name)))

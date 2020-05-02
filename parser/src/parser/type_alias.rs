@@ -13,7 +13,7 @@ impl<'a> Parser<'a> {
         self.ident();
 
         if self.at(L_ANGLE) {
-            self.parse_type_params(false);
+            self.parse_type_params(true);
         }
 
         self.expect(EQ);

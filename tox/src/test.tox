@@ -1,14 +1,23 @@
 import foo::bar::{bar};
 
+type ParserResult<T> = Result<T,i32>;
 
 mod bar;
 mod foo;
 
-type ParserResult<T> = Result<T,i32>;
+export fn main()  { 
+    let x= 10;
+    let x =10;
+    let x =x;
+    v=10;
 
-
-fn main() {
-    for(let x = 10; x< 10; x=x+1) {
-        println("it works ")
+    for(let i=0;i<10;i+=1) {
+        print("ok");
     };
+    if true {print("good")} else {print("bad")};
+}
+
+
+export fn main() {
+    
 }

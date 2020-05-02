@@ -12,6 +12,6 @@ mod resolver;
 
 // mod util;
 
-pub use db::{HirDatabase, HirDatabaseStorage, InternDatabaseStorage, TypeCtx};
+pub use db::{HirDatabase, HirDatabaseStorage, InternDatabaseStorage};
 pub use infer::Ctx;
 pub use syntax::TextRange;

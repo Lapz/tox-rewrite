@@ -81,10 +81,6 @@ impl FunctionAstMap {
     pub(crate) fn pat(&self, id: &PatId) -> &Pattern {
         &self.hir_to_pattern[id]
     }
-
-    pub(crate) fn pattern_span(&self, id: &PatId) -> TextRange {
-        self.ast_to_pattern[id].syntax_node_ptr().range()
-    }
 }
 
 struct BodyMap {

@@ -1,5 +1,4 @@
 use errors::{emit, ColorChoice, Config, Diagnostic, FileId, Files, StandardStream};
-use semant::{Ctx, TypeCtx};
 use std::default::Default;
 use std::io::{self};
 use std::ops::Range;
@@ -29,16 +28,6 @@ impl Diagnostics for DatabaseImpl {
         }
 
         Ok(())
-    }
-}
-
-impl TypeCtx for DatabaseImpl {
-    fn get_ctx(&self, file: FileId) -> Ctx {
-        unimplemented!()
-    }
-
-    fn get_ctx_mut(&mut self, file: FileId) -> Ctx {
-        unimplemented!()
     }
 }
 

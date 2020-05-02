@@ -438,7 +438,6 @@ pub fn resolve_exports_query(db: &impl HirDatabase, file: FileId) -> WithError<A
 pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithError<()> {
     let program = db.lower(file)?;
 
-    println!("{:#?}", program.functions);
     let reporter = Reporter::new(file);
 
     let mut collector = ResolverDataCollector {

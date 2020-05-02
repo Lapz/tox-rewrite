@@ -1191,6 +1191,10 @@ impl IdentType {
     pub fn type_ref(&self) -> Option<TypeRef> {
         child_opt(self)
     }
+
+    pub fn type_params(&self) -> Option<TypeParamList> {
+        child_opt(self)
+    }
 }
 
 // IfExpr

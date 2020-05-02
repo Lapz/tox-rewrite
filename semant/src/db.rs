@@ -1,9 +1,4 @@
-use crate::{
-    hir,
-    infer::{self, Ctx},
-    resolver::FileTable,
-    resolver::ModuleGraph,
-};
+use crate::{hir, resolver::FileTable, resolver::ModuleGraph};
 use errors::{FileId, WithError};
 use parser::ParseDatabase;
 
@@ -64,9 +59,4 @@ pub trait HirDatabase: std::fmt::Debug + InternDatabase + ParseDatabase {
 
     #[salsa::invoke(crate::infer::infer_query)]
     fn infer(&self, file: FileId) -> WithError<()>;
-}
-
-pub trait TypeCtx {
-    fn get_ctx(&self, file: FileId) -> Ctx;
-    fn get_ctx_mut(&mut self, file: FileId) -> Ctx;
 }

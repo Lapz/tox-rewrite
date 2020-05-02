@@ -4,8 +4,6 @@ use crate::{
     hir::{Name, NameId},
     infer::ty::{EnumVariant, Type, TypeCon, TypeVar},
 };
-use errors::{FileId, WithError};
-use std::sync::{Arc, RwLock};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Ctx {

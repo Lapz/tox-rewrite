@@ -37,7 +37,7 @@ pub enum Type {
 /// ```ignore
 /// Foo::Bar => Variant {
 //      tag:0, // the number it was declared at
-///     inner:None // if it dosen't have an inner type i.e Ok(foo)
+///     inner:None // if it doesn't have an inner type i.e Ok(foo)
 ///  }
 /// ```
 

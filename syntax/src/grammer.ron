@@ -221,7 +221,10 @@ Grammar(
 
         "ArrayType": ( options: ["TypeRef", "Expr"] ),
         "ParenType": (traits:["TypesOwner"],options: ["TypeRef"],),
-        "IdentType": (options: ["TypeRef"]),
+        "IdentType": (
+            options: ["TypeRef", ["type_params","TypeParamList"]],
+
+        ),
         "FnType": (options: ["ParamList", "RetType"],traits:["TypesOwner"]),
 
         "TypeRef":(enum:[

@@ -9,7 +9,7 @@ pub fn resolve_imports_query(
     let mut reporter = Reporter::new(file);
     let import = db.lower_import(file, import_id);
     let module_graphs = db.module_graph(file)?;
-    let mut nodes = module_graphs.get_node(&file);
+    let nodes = module_graphs.get_node(&file);
     let mut import_err = String::new();
     let span = (import.span.start().to_usize(), import.span.end().to_usize());
 
