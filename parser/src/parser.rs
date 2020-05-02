@@ -226,7 +226,6 @@ impl<'a> Parser<'a> {
     fn finish_node(&mut self) {
         match replace(&mut self.state, State::PendingFinish) {
             State::PendingFinish | State::Normal => {
-                self.eat_trivias();
                 self.builder.finish_node();
             }
             State::PendingStart => unreachable!(),

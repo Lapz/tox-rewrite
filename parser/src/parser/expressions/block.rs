@@ -12,11 +12,11 @@ impl<'a> Parser<'a> {
         self.expect(T!["{"]);
 
         while !self.at(EOF) && !self.at(T!["}"]) {
-            self.eat_trivias();
             match self.current() {
                 T![let] => {
                     // self.start_node(EXPR_STMT);
                     self.parse_let_expr();
+                    self.expect(T![;])
                     // self.finish_node();
                 }
                 T![if] => {
@@ -75,12 +75,9 @@ impl<'a> Parser<'a> {
                 _ => {
                     self.start_node(EXPR_STMT);
                     self.parse_expression(Precedence::Assignment, Restrictions::default());
+                    self.expect(T![;]);
                     self.finish_node();
                 }
-            }
-
-            if !self.at(T!["}"]) && !self.expected(T![;]) {
-                break;
             }
         }
 
