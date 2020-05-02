@@ -16,7 +16,6 @@ impl<'a> Parser<'a> {
                 T![let] => {
                     // self.start_node(EXPR_STMT);
                     self.parse_let_expr();
-                    self.expect(T![;])
                     // self.finish_node();
                 }
                 T![if] => {
