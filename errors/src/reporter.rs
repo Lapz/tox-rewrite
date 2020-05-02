@@ -29,6 +29,10 @@ impl Reporter {
         diagnostics
     }
 
+    pub fn extend(&mut self, s: Vec<Diagnostic<FileId>>) {
+        self.diagnostics.borrow_mut().extend(s.into_iter())
+    }
+
     pub fn error(
         &mut self,
         message: impl Into<String>,

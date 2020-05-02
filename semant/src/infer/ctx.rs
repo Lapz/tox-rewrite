@@ -24,18 +24,21 @@ impl Ctx {
         let result_name = db.intern_name(Name::new("Result"));
         types.insert(
             result_name,
-            Type::Enum(
-                result_name,
-                vec![
-                    EnumVariant {
-                        tag: 0,
-                        inner: Some(Type::Var(TypeVar::from(0))), // Ok(T)
-                    },
-                    EnumVariant {
-                        tag: 1,
-                        inner: Some(Type::Var(TypeVar::from(1))), // Err(U)
-                    },
-                ],
+            Type::Poly(
+                vec![TypeVar::from(0), TypeVar::from(1)],
+                Box::new(Type::Enum(
+                    result_name,
+                    vec![
+                        EnumVariant {
+                            tag: 0,
+                            inner: Some(Type::Var(TypeVar::from(0))), // Ok(T)
+                        },
+                        EnumVariant {
+                            tag: 1,
+                            inner: Some(Type::Var(TypeVar::from(1))), // Err(U)
+                        },
+                    ],
+                )),
             ),
         );
 

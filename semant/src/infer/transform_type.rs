@@ -16,6 +16,8 @@ pub(crate) fn transform_type(
 
     let ty = db.lookup_intern_type(id.item);
 
+    println!("{:?}", ty);
+
     match ty {
         hir::Type::ParenType(types) => {
             let mut signature = vec![];
@@ -59,6 +61,27 @@ pub(crate) fn transform_type(
             );
 
             Err(reporter.finish())
+        }
+        hir::Type::Poly { name, type_args } => {
+            for ty in type_args.iter() {
+                match transform_type(db, file, ty, ctx) {
+                    Ok(_) => {}
+                    Err(e) => reporter.extend(e),
+                }
+            }
+
+            let span = (id.start().to_usize(), id.end().to_usize());
+            reporter.error(
+                format!("Use of undefined type `{}`", db.lookup_intern_name(name)),
+                "",
+                span,
+            );
+
+            Err(reporter.finish())
+
+            // if let Some(ty) = ctx.get_type(&name) {
+            //     return Ok(ty.clone());
+            // }
         }
     }
 }
