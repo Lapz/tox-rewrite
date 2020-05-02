@@ -48,6 +48,7 @@ where
     }
 
     pub(crate) fn lower_type(&mut self, ty: ast::TypeRef) -> util::Span<hir::TypeId> {
+        let range = ty.syntax().text_range();
         let id = match ty {
             ast::TypeRef::ParenType(paren_ty) => {
                 let mut types = Vec::new();
@@ -85,7 +86,7 @@ where
             }
         };
 
-        util::Span::from_ast(id, &ty)
+        util::Span::from_range(id, range)
     }
 }
 pub(crate) fn lower_type_alias_query(

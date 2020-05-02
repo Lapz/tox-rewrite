@@ -14,9 +14,9 @@ pub(crate) fn lower_module_query(
     let module = db.lookup_intern_module(mod_id);
 
     let name = module.name().unwrap();
-    let span = name.syntax().text_range();
+    let range = name.syntax().text_range();
     let name_id = db.intern_name(name.into());
-    let name = Span::new(name_id, span);
+    let name = Span::from_range(name_id, range);
 
     let span = module.syntax().text_range();
     Arc::new(hir::Module {

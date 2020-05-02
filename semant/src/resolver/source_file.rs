@@ -1,5 +1,5 @@
 use crate::db::HirDatabase;
-use crate::hir;
+use crate::{hir, util};
 
 use errors::{FileId, Reporter, WithError};
 
@@ -15,7 +15,7 @@ pub(crate) struct ResolverDataCollector<DB> {
     reporter: Reporter,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum State {
     Declared,
     Defined,
@@ -30,8 +30,8 @@ pub(crate) struct Scopes {
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub(crate) struct FunctionData {
-    scopes: Vec<HashMap<hir::NameId, State>>,
-    locals: HashMap<hir::NameId, usize>,
+    scopes: Vec<HashMap<hir::NameId, util::Span<State>>>,
+    locals: HashMap<util::Span<hir::NameId>, usize>,
 }
 
 impl FunctionData {
@@ -122,10 +122,12 @@ where
 
         let scopes = data.scopes.pop().unwrap();
 
-        for (symbol, state) in &scopes {
-            if state == &State::Defined {
-                let _msg = format!("Unused variable `{}`", self.db.lookup_intern_name(*symbol));
-                // self.reporter.warn(msg,"")
+        for (name, state) in &scopes {
+            println!("{:?}", name);
+            if state.item == State::Defined {
+                let msg = format!("Unused variable `{}`", self.db.lookup_intern_name(*name));
+                self.reporter
+                    .warn(msg, "", (state.start().to_usize(), state.end().to_usize()))
             }
         }
     }
@@ -134,36 +136,46 @@ where
         self.table.peek(function_name)
     }
 
-    pub(crate) fn declare(
-        &mut self,
-        function: hir::FunctionId,
-        name: hir::NameId,
-        span: hir::Span,
-    ) {
+    pub(crate) fn declare(&mut self, function: hir::FunctionId, name: util::Span<hir::NameId>) {
         let index = self.peek(function);
 
-        if self.table.function_data(function).scopes[index].contains_key(&name) {
+        if self.table.function_data(function).scopes[index].contains_key(&name.item) {
             let msg = format!(
                 "The name `{}` already exists in this scope.",
-                self.db.lookup_intern_name(name)
+                self.db.lookup_intern_name(name.item)
             );
 
             self.reporter
-                .warn(msg, "", (span.start().to_usize(), span.end().to_usize()))
+                .warn(msg, "", (name.start().to_usize(), name.end().to_usize()))
         }
 
-        self.table.function_data_mut(function).scopes[index].insert(name, State::Declared);
+        self.table.function_data_mut(function).scopes[index].insert(
+            name.item,
+            util::Span::new(State::Declared, name.start(), name.end()),
+        );
     }
 
-    pub(crate) fn define(&mut self, function: hir::FunctionId, name: hir::NameId) {
+    pub(crate) fn define(&mut self, function: hir::FunctionId, name: util::Span<hir::NameId>) {
         let index = self.peek(function);
 
-        self.table.function_data_mut(function).scopes[index].insert(name, State::Defined);
+        self.table.function_data_mut(function).scopes[index].insert(
+            name.item,
+            util::Span::new(State::Defined, name.start(), name.end()),
+        );
     }
 
-    pub(crate) fn not_resolved(&mut self, function: hir::FunctionId, name: &hir::NameId) -> bool {
+    pub(crate) fn not_resolved(
+        &mut self,
+        function: hir::FunctionId,
+        name: &util::Span<hir::NameId>,
+    ) -> bool {
         let index = self.peek(function);
-        self.table.function_data(function).scopes[index].get(name) == Some(&State::Declared)
+
+        if let Some(state) = self.table.function_data(function).scopes[index].get(&name.item) {
+            return state.item == State::Declared;
+        } else {
+            false
+        }
     }
 
     pub(crate) fn define_pattern(
@@ -178,7 +190,7 @@ where
             hir::Pattern::Bind { name } => self.define(function, *name),
             hir::Pattern::Tuple(pats) => pats
                 .iter()
-                .for_each(|pat| self.define_pattern(function, ast_map, pat)),
+                .for_each(|pat| self.define_pattern(function, ast_map, &pat.item)),
             hir::Pattern::Literal(_) => {}
             hir::Pattern::Placeholder => {}
         }
@@ -199,7 +211,7 @@ where
         if self.table.contains(name) {
             let name = self
                 .db
-                .lookup_intern_name(self.db.lower_function(file, id).name);
+                .lookup_intern_name(self.db.lower_function(file, id).name.item);
 
             self.reporter.error(
                 format!("The name `{}` is defined multiple times", name),
@@ -222,13 +234,13 @@ where
 
         match stmt {
             hir::Stmt::Let { pat, initializer } => {
-                self.resolve_pattern(function, ast_map, pat);
+                self.resolve_pattern(function, ast_map, &pat.item);
 
                 if let Some(init) = initializer {
                     self.resolve_expression(function, ast_map, init)
                 }
 
-                self.define_pattern(function, ast_map, pat);
+                self.define_pattern(function, ast_map, &pat.item);
             }
 
             hir::Stmt::Expr(expr) => self.resolve_expression(function, ast_map, expr),
@@ -293,7 +305,7 @@ where
                 if self.not_resolved(function, name) {
                     let msg = format!(
                         "Cannot read local name `{}` in its own initializer.",
-                        self.db.lookup_intern_name(*name)
+                        self.db.lookup_intern_name(name.item)
                     );
 
                     self.reporter
@@ -338,7 +350,7 @@ where
                 arms.iter().for_each(|arm| {
                     arm.pats
                         .iter()
-                        .for_each(|pat_id| self.resolve_pattern(function, ast_map, pat_id));
+                        .for_each(|pat_id| self.resolve_pattern(function, ast_map, &pat_id.item));
                     self.resolve_expression(function, ast_map, &arm.expr)
                 })
             }
@@ -348,7 +360,7 @@ where
     pub(crate) fn resolve_local(
         &mut self,
         function: hir::FunctionId,
-        name: &hir::NameId,
+        name: &util::Span<hir::NameId>,
         is_read: bool,
         span: hir::Span,
     ) {
@@ -356,10 +368,10 @@ where
         let max_depth = data.scopes.len();
 
         for i in 0..max_depth {
-            if data.scopes[max_depth - i - 1].contains_key(name) {
+            if data.scopes[max_depth - i - 1].contains_key(&name.item) {
                 if is_read {
-                    if let Some(state) = data.scopes[max_depth - i - 1].get_mut(name) {
-                        *state = State::Read
+                    if let Some(state) = data.scopes[max_depth - i - 1].get_mut(&name.item) {
+                        *state = util::Span::new(State::Read, name.start(), name.end())
                     }
                 }
 
@@ -367,11 +379,11 @@ where
             }
         } // check for ident name in function/local scope
 
-        if !self.table.contains(*name) {
+        if !self.table.contains(name.item) {
             //  check for external import global level
             let msg = format!(
                 "Use of undefined variable `{}`",
-                self.db.lookup_intern_name(*name)
+                self.db.lookup_intern_name(name.item)
             );
 
             self.reporter
@@ -388,12 +400,10 @@ where
         let pat = ast_map.pat(pat_id);
 
         match &pat {
-            hir::Pattern::Bind { name } => {
-                self.declare(function, *name, ast_map.pattern_span(pat_id))
-            }
+            hir::Pattern::Bind { name } => self.declare(function, *name),
             hir::Pattern::Tuple(pats) => pats
                 .iter()
-                .for_each(|pat| self.resolve_pattern(function, ast_map, pat)),
+                .for_each(|pat| self.resolve_pattern(function, ast_map, &pat.item)),
             hir::Pattern::Literal(_) => {}
             hir::Pattern::Placeholder => {}
         }
@@ -413,7 +423,7 @@ pub fn resolve_exports_query(db: &impl HirDatabase, file: FileId) -> WithError<A
         collector.insert_top_level(
             file,
             function.id,
-            function.name,
+            function.name.item,
             function.exported,
             function.span,
         )
@@ -428,6 +438,8 @@ pub fn resolve_exports_query(db: &impl HirDatabase, file: FileId) -> WithError<A
 
 pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithError<()> {
     let program = db.lower(file)?;
+
+    println!("{:#?}", program.functions);
     let reporter = Reporter::new(file);
 
     let mut collector = ResolverDataCollector {
@@ -447,7 +459,7 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
         collector.insert_top_level(
             file,
             function.id,
-            function.name,
+            function.name.item,
             function.exported,
             function.span,
         )

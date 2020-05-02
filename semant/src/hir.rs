@@ -149,7 +149,7 @@ pub struct BlockId(pub(crate) u64);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Pattern {
-    Bind { name: NameId },
+    Bind { name: util::Span<NameId> },
     Placeholder,
     Tuple(Vec<util::Span<PatId>>),
     Literal(LiteralId),
@@ -222,7 +222,7 @@ pub enum Expr {
         then_branch: ExprId,
         else_branch: Option<ExprId>,
     },
-    Ident(NameId),
+    Ident(util::Span<NameId>),
     Index {
         base: ExprId,
         index: ExprId,

@@ -144,6 +144,8 @@ where
                         .map(|n| n.into())
                         .unwrap_or_else(crate::hir::Name::missing),
                 );
+
+                let name = util::Span::from_ast(name, &binding.name().unwrap());
                 crate::hir::Pattern::Bind { name }
             }
             ast::Pat::PlaceholderPat(_) => crate::hir::Pattern::Placeholder,
@@ -176,6 +178,7 @@ where
     }
 
     pub(crate) fn lower_type(&mut self, ty: ast::TypeRef) -> util::Span<hir::TypeId> {
+        let range = ty.syntax().text_range();
         let id = match ty {
             ast::TypeRef::ParenType(paren_ty) => {
                 let mut types = Vec::new();
@@ -213,7 +216,7 @@ where
             }
         };
 
-        util::Span::from_ast(id, &ty)
+        util::Span::from_range(id, range)
     }
 
     pub fn lower_stmt(&mut self, node: ast::Stmt) -> hir::StmtId {
@@ -314,9 +317,10 @@ where
 
                 hir::Expr::Block(block)
             }
-            ast::Expr::IdentExpr(ref ident_expr) => {
-                hir::Expr::Ident(self.db.intern_name(ident_expr.name().unwrap().into()))
-            }
+            ast::Expr::IdentExpr(ref ident_expr) => hir::Expr::Ident(util::Span::from_ast(
+                self.db.intern_name(ident_expr.name().unwrap().into()),
+                &ident_expr.name().unwrap(),
+            )),
             ast::Expr::IfExpr(ref if_expr) => {
                 let cond = self.lower_expr(if_expr.condition().unwrap().expr().unwrap());
                 let then_branch = self.lower_expr(ast::Expr::from(if_expr.then_branch().unwrap()));
