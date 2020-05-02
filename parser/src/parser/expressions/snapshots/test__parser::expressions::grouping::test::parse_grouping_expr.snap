@@ -1,5 +1,5 @@
 ---
-created: "2020-05-02T10:11:44.287447Z"
+created: "2020-05-02T10:42:47.029003Z"
 creator: insta@0.8.2
 source: parser/src/parser/expressions/grouping.rs
 expression: "crate::utils::dump_debug(&parser_output)"
@@ -17,7 +17,7 @@ SOURCE_FILE@[0; 21)
     BLOCK_EXPR@[10; 21)
       BLOCK@[10; 21)
         L_CURLY@[10; 11) "{"
-        EXPR_STMT@[11; 20)
+        EXPR_STMT@[11; 19)
           PAREN_EXPR@[11; 19)
             L_PAREN@[11; 12) "("
             BIN_EXPR@[12; 18)
@@ -31,6 +31,6 @@ SOURCE_FILE@[0; 21)
               LITERAL@[17; 18)
                 INT_NUMBER@[17; 18) "1"
             R_PAREN@[18; 19) ")"
-          SEMI@[19; 20) ";"
+        SEMI@[19; 20) ";"
         R_CURLY@[20; 21) "}"
 

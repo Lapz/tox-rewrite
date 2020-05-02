@@ -79,9 +79,12 @@ impl<'a> Parser<'a> {
                 _ => {
                     self.start_node(EXPR_STMT);
                     self.parse_expression(Precedence::Assignment, Restrictions::default());
-                    self.expect(T![;]);
                     self.finish_node();
                 }
+            }
+
+            if self.at(T![;]) {
+                self.bump();
             }
         }
 

@@ -1,5 +1,5 @@
 ---
-created: "2020-05-02T10:11:44.170539Z"
+created: "2020-05-02T10:42:46.949219Z"
 creator: insta@0.8.2
 source: parser/src/parser/expressions/binary.rs
 expression: "crate::utils::dump_debug(&parser_output)"
@@ -17,13 +17,13 @@ SOURCE_FILE@[0; 16)
     BLOCK_EXPR@[10; 16)
       BLOCK@[10; 16)
         L_CURLY@[10; 11) "{"
-        EXPR_STMT@[11; 15)
+        EXPR_STMT@[11; 14)
           BIN_EXPR@[11; 14)
             LITERAL@[11; 12)
               INT_NUMBER@[11; 12) "1"
             PLUS@[12; 13) "+"
             LITERAL@[13; 14)
               INT_NUMBER@[13; 14) "1"
-          SEMI@[14; 15) ";"
+        SEMI@[14; 15) ";"
         R_CURLY@[15; 16) "}"
 

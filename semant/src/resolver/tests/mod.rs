@@ -107,7 +107,7 @@ mod test {
         let dir = tempdir()?;
 
         let structure = load_file(&format!(
-            "{}/src/tests/with_dir.ron",
+            "{}/src/resolver/tests/with_dir.ron",
             env!("CARGO_MANIFEST_DIR")
         ));
 
