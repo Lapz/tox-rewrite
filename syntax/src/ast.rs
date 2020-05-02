@@ -155,11 +155,12 @@ pub enum SyntaxKind {
     LET_STMT, // 130
     EXPR_STMT, // 131
     TYPE_PARAM_LIST, // 132
-    TYPE_PARAM, // 133
-    PARAM_LIST, // 134
-    PARAM, // 135
-    SELF_PARAM, // 136
-    ARG_LIST, // 137
+    TYPE_ARG_LIST, // 133
+    TYPE_PARAM, // 134
+    PARAM_LIST, // 135
+    PARAM, // 136
+    SELF_PARAM, // 137
+    ARG_LIST, // 138
     // Technical kind so that we can cast from u16 safely
     #[doc(hidden)]
     __LAST,
@@ -311,6 +312,7 @@ impl SyntaxKind {
             LET_STMT => "LET_STMT",
             EXPR_STMT => "EXPR_STMT",
             TYPE_PARAM_LIST => "TYPE_PARAM_LIST",
+            TYPE_ARG_LIST => "TYPE_ARG_LIST",
             TYPE_PARAM => "TYPE_PARAM",
             PARAM_LIST => "PARAM_LIST",
             PARAM => "PARAM",
@@ -1192,7 +1194,7 @@ impl IdentType {
         child_opt(self)
     }
 
-    pub fn type_params(&self) -> Option<TypeParamList> {
+    pub fn type_args(&self) -> Option<TypeArgList> {
         child_opt(self)
     }
 }
@@ -2138,6 +2140,33 @@ impl traits::TypeParamsOwner for TypeAliasDef {}
 impl TypeAliasDef {
     pub fn type_ref(&self) -> Option<TypeRef> {
         child_opt(self)
+    }
+}
+
+// TypeArgList
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct TypeArgList {
+    pub(crate) syntax: SyntaxNode,
+}
+
+impl AstNode for TypeArgList {
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            TYPE_ARG_LIST => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) { Some(TypeArgList { syntax }) } else { None }
+    }
+    fn syntax(&self) -> &SyntaxNode { &self.syntax }
+}
+
+
+impl TypeArgList {
+    pub fn types(&self) -> impl Iterator<Item = TypeRef> {
+        children(self)
     }
 }
 

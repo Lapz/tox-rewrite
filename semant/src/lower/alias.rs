@@ -65,16 +65,25 @@ where
                 self.db.intern_type(hir::Type::ArrayType { ty, size: None })
             }
             ast::TypeRef::IdentType(ident_ty) => {
-                let type_params = ident_ty.type_params();
+                if let Some(type_args) = ident_ty.type_args() {
+                    let type_args = type_args
+                        .types()
+                        .map(|ty| self.lower_type(ty))
+                        .collect::<Vec<_>>();
 
-                let name: hir::Name = ident_ty.into();
+                    let name: hir::Name = ident_ty.into();
 
-                if type_params.is_some() {
-                    println!("it works");
+                    self.db.intern_type(hir::Type::Poly {
+                        name: self.db.intern_name(name),
+                        type_args,
+                    })
+                } else {
+                    let name: hir::Name = ident_ty.into();
+
+                    let name_id = self.db.intern_name(name);
+
+                    self.db.intern_type(hir::Type::Ident(name_id))
                 }
-
-                self.db
-                    .intern_type(hir::Type::Ident(self.db.intern_name(name)))
             }
 
             ast::TypeRef::FnType(fn_ty) => {

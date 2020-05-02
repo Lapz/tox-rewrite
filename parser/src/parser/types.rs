@@ -35,7 +35,7 @@ impl<'a> Parser<'a> {
         }
 
         if self.at(T![<]) {
-            self.parse_type_params(false);
+            self.parse_type_args();
         }
 
         self.finish_node();

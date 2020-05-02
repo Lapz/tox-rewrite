@@ -182,6 +182,10 @@ pub enum Type {
         params: Vec<util::Span<TypeId>>,
         ret: Option<util::Span<TypeId>>,
     },
+    Poly {
+        name: NameId,
+        type_args: Vec<util::Span<TypeId>>,
+    },
     Ident(NameId),
 }
 

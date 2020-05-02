@@ -53,7 +53,7 @@ pub(crate) fn transform_type(
 
             let span = (id.start().to_usize(), id.end().to_usize());
             reporter.error(
-                format!("Use of undefinen type `{}`", db.lookup_intern_name(name)),
+                format!("Use of undefined type `{}`", db.lookup_intern_name(name)),
                 "",
                 span,
             );

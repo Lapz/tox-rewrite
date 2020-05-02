@@ -10,6 +10,7 @@ mod pratt;
 mod restrictions;
 mod source_file;
 mod type_alias;
+mod type_args;
 mod type_params;
 mod types;
 mod visibility;
@@ -360,15 +361,6 @@ impl<'a> Parser<'a> {
             }
         }
         false
-    }
-
-    fn eat_trivias(&mut self) {
-        while let Some(&token) = self.tokens.get(self.token_pos) {
-            if !token.value.kind.is_trivia() {
-                break;
-            }
-            self.add_token(&token);
-        }
     }
 
     fn add_token(&mut self, token: &Span<Token>) {

@@ -155,6 +155,7 @@ Grammar(
         "EXPR_STMT",
 
         "TYPE_PARAM_LIST",
+        "TYPE_ARG_LIST",
         "TYPE_PARAM",
         "PARAM_LIST",
         "PARAM",
@@ -222,7 +223,7 @@ Grammar(
         "ArrayType": ( options: ["TypeRef", "Expr"] ),
         "ParenType": (traits:["TypesOwner"],options: ["TypeRef"],),
         "IdentType": (
-            options: ["TypeRef", ["type_params","TypeParamList"]],
+            options: ["TypeRef", ["type_args","TypeArgList"]],
 
         ),
         "FnType": (options: ["ParamList", "RetType"],traits:["TypesOwner"]),
@@ -335,6 +336,11 @@ Grammar(
         "TypeParamList": (
             collections: [
                 ["type_params", "TypeParam" ],
+            ]
+        ),
+        "TypeArgList": (
+            collections: [
+                ["types", "TypeRef" ],
             ]
         ),
         "ArgList": (
