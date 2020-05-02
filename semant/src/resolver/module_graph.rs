@@ -33,8 +33,8 @@ impl ModuleGraph {
         self.edges.get(file)
     }
 
-    pub fn get_node(&self, file: &FileId) -> &HashMap<NameId, FileId> {
-        &self.edges[file]
+    pub fn get_node(&self, file: &FileId) -> Option<&HashMap<NameId, FileId>> {
+        self.edges.get(file)
     }
 
     pub fn merge(&mut self, other: ModuleGraph) {

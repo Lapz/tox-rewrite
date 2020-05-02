@@ -11,6 +11,19 @@ pub fn resolve_imports_query(
     let module_graphs = db.module_graph(file)?;
     let mut nodes = module_graphs.get_node(&file);
     let mut import_err = String::new();
+    let span = (import.span.start().to_usize(), import.span.end().to_usize());
+
+    if nodes.is_none() {
+        reporter.error(
+            "Trying to reference an import for the a file that is not declared",
+            "",
+            span,
+        );
+
+        return Err(reporter.finish());
+    }
+
+    let mut nodes = nodes.unwrap();
 
     for segment in &import.segments {
         if let Some(module) = nodes.get(&segment.name) {
@@ -33,9 +46,9 @@ pub fn resolve_imports_query(
                             "Unresolved import",
                             format!(
                                 "Couldn't find the import `{}`",
-                                format!("{}{}", import_err, db.lookup_intern_name(*name))
+                                format!("{}{}", import_err, db.lookup_intern_name(*name)),
                             ),
-                            (import.span.start().to_usize(), import.span.end().to_usize()),
+                            span,
                         );
                     }
                 }
@@ -46,7 +59,7 @@ pub fn resolve_imports_query(
             reporter.error(
                 "Unresolved module when finding import",
                 format!("Couldn't find the import `{}`", import_err),
-                (import.span.start().to_usize(), import.span.end().to_usize()),
+                span,
             )
         }
     }
