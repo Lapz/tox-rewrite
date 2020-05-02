@@ -70,7 +70,11 @@ impl<'a> Parser<'a> {
                     }
                     continue;
                 }
-                T!["{"] => self.parse_block(),
+                T!["{"] => {
+                    self.start_node(EXPR_STMT);
+                    self.parse_block();
+                    self.finish_node();
+                }
 
                 _ => {
                     self.start_node(EXPR_STMT);
@@ -90,11 +94,11 @@ impl<'a> Parser<'a> {
 
 #[cfg(test)]
 mod test {
-    test_parser! {parse_free_block, "fn main() {{};}"}
-    test_parser! {parse_nested_block,"fn main() {{ {};};}"}
+    test_parser! {parse_free_block, "fn main() {{}}"}
+    test_parser! {parse_nested_block,"fn main() {{{}}}"}
     test_parser! {parse_block_with_statements,"fn main() {{
         let x = 10;
         break;
         continue;
-    }}"}
+    } let y =10;}"}
 }

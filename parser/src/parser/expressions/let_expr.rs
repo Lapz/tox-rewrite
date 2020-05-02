@@ -32,8 +32,6 @@ impl<'a> Parser<'a> {
             self.parse_expression(Precedence::Assignment, Restrictions::default());
         }
 
-        println!("{:?}", self.current());
-
         self.finish_node()
     }
 }

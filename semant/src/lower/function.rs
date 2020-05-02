@@ -254,7 +254,6 @@ where
                 hir::Expr::Binary { lhs, op, rhs }
             }
             ast::Expr::BlockExpr(ref block) => {
-                println!("{:?}", block.syntax().text());
                 let node = block.block().unwrap();
                 let block = hir::Block(
                     block
