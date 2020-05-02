@@ -1,5 +1,5 @@
 use crate::db::HirDatabase;
-use crate::{hir, util};
+use crate::{hir, util, TextRange};
 
 use errors::{FileId, Reporter, WithError};
 
@@ -49,7 +49,7 @@ impl FunctionData {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FileTable {
     /// FUNCTION NAME TO FUNCTION SPAN
-    symbol_level: HashMap<hir::NameId, hir::Span>,
+    symbol_level: HashMap<hir::NameId, TextRange>,
     symbol_exports: HashSet<hir::NameId>,
     function_data: HashMap<hir::FunctionId, FunctionData>,
 }
@@ -83,11 +83,11 @@ impl FileTable {
         self.symbol_exports.get(id).is_some()
     }
 
-    pub fn get_span(&self, id: hir::NameId) -> hir::Span {
+    pub fn get_span(&self, id: hir::NameId) -> TextRange {
         self.symbol_level[&id]
     }
 
-    pub(crate) fn insert_name(&mut self, name: hir::NameId, span: hir::Span, exported: bool) {
+    pub(crate) fn insert_name(&mut self, name: hir::NameId, span: TextRange, exported: bool) {
         self.symbol_level.insert(name, span);
 
         if exported {
@@ -123,7 +123,6 @@ where
         let scopes = data.scopes.pop().unwrap();
 
         for (name, state) in &scopes {
-            println!("{:?}", name);
             if state.item == State::Defined {
                 let msg = format!("Unused variable `{}`", self.db.lookup_intern_name(*name));
                 self.reporter
@@ -206,7 +205,7 @@ where
         id: hir::FunctionId,
         name: hir::NameId,
         exported: bool,
-        span: hir::Span,
+        span: TextRange,
     ) {
         if self.table.contains(name) {
             let name = self
@@ -362,7 +361,7 @@ where
         function: hir::FunctionId,
         name: &util::Span<hir::NameId>,
         is_read: bool,
-        span: hir::Span,
+        span: TextRange,
     ) {
         let data = self.table.function_data_mut(function);
         let max_depth = data.scopes.len();

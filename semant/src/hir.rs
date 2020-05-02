@@ -6,7 +6,6 @@ use crate::util;
 use errors::FileId;
 use std::{path::Path, sync::Arc};
 use syntax::{ast, text_of_first_token, AstNode, SmolStr, SyntaxKind, TextRange, T};
-pub type Span = TextRange;
 
 #[derive(Debug, Default, Eq, PartialEq, Clone, Hash)]
 pub struct SourceFile {
@@ -39,7 +38,7 @@ pub struct Import {
     pub(crate) id: ImportId,
     pub(crate) segments: Vec<Segment>,
     pub(crate) file: FileId,
-    pub(crate) span: Span,
+    pub(crate) span: TextRange,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Segment {
@@ -56,7 +55,7 @@ pub struct Function {
     pub(crate) params: Vec<util::Span<ParamId>>,
     pub(crate) type_params: Vec<util::Span<TypeParamId>>,
     pub(crate) body: Option<Vec<StmtId>>,
-    pub(crate) span: Span,
+    pub(crate) span: TextRange,
 }
 /// A symbol is composed of a name and the file it belongs to
 /// Symbols with the same name but from different files are not the sames
@@ -130,7 +129,7 @@ pub struct TypeAlias {
     pub(crate) name: util::Span<NameId>,
     pub(crate) type_params: Vec<util::Span<TypeParamId>>,
     pub(crate) ty: util::Span<TypeId>,
-    pub(crate) span: Span,
+    pub(crate) span: TextRange,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
@@ -138,7 +137,7 @@ pub struct Module {
     pub(crate) id: ModuleId,
     pub(crate) name: util::Span<NameId>,
     pub(crate) file: FileId,
-    pub(crate) span: Span,
+    pub(crate) span: TextRange,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

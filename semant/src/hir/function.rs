@@ -1,6 +1,6 @@
 use super::{
-    Block, BlockId, Expr, ExprId, Param, ParamId, PatId, Pattern, Span, Stmt, StmtId, TypeParam,
-    TypeParamId,
+    Block, BlockId, Expr, ExprId, Param, ParamId, PatId, Pattern, Stmt, StmtId, TextRange,
+    TypeParam, TypeParamId,
 };
 use indexmap::IndexMap;
 use std::collections::hash_map::DefaultHasher;
@@ -70,7 +70,7 @@ impl FunctionAstMap {
         self.hir_to_expr.get(id).unwrap()
     }
 
-    pub(crate) fn expr_span(&self, id: &ExprId) -> Span {
+    pub(crate) fn expr_span(&self, id: &ExprId) -> TextRange {
         self.ast_to_expr[id].syntax_node_ptr().range()
     }
 
@@ -82,7 +82,7 @@ impl FunctionAstMap {
         &self.hir_to_pattern[id]
     }
 
-    pub(crate) fn pattern_span(&self, id: &PatId) -> Span {
+    pub(crate) fn pattern_span(&self, id: &PatId) -> TextRange {
         self.ast_to_pattern[id].syntax_node_ptr().range()
     }
 }
