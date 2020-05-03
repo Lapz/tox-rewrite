@@ -27,6 +27,7 @@ where
             name,
             type_params,
             span,
+            ast_map: self.ast_map,
             ty,
         }
     }
@@ -45,6 +46,7 @@ where
 
         self.ast_map
             .insert_type_param(id, type_param, AstPtr::new(ast_node));
+        self.type_params.push(util::Span::from_ast(id, ast_node));
     }
 
     pub(crate) fn lower_type(&mut self, ty: ast::TypeRef) -> util::Span<hir::TypeId> {

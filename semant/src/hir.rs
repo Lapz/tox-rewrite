@@ -129,6 +129,7 @@ pub struct TypeAlias {
     pub(crate) name: util::Span<NameId>,
     pub(crate) type_params: Vec<util::Span<TypeParamId>>,
     pub(crate) ty: util::Span<TypeId>,
+    pub(crate) ast_map: FunctionAstMap,
     pub(crate) span: TextRange,
 }
 

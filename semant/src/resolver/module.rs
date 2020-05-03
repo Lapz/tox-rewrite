@@ -76,7 +76,7 @@ pub fn resolve_modules_query(
         (true, true) => {
             dir.push(format!("{}.tox", name));
 
-            // module exists and is the same as the one its being decleared in
+            // module exists and is the same as the one its being declared in
             // check its children and report an err if its not found
             if path_buf == db.lookup_intern_file(module.file) && !dir.exists() {
                 reporter.error(format!("Unresolved module `{}`", name), "", span);

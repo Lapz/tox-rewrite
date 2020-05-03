@@ -79,12 +79,19 @@ impl Cli {
                 }
             }
 
-            match db.infer(handle) {
+            match db.resolve_file(handle) {
                 Ok(_) => {}
                 Err(more_errors) => {
                     errors.extend(more_errors);
                 }
             }
+
+            // match db.infer(handle) {
+            //     Ok(_) => {}
+            //     Err(more_errors) => {
+            //         errors.extend(more_errors);
+            //     }
+            // }
 
             db.emit(&mut errors)?;
         }

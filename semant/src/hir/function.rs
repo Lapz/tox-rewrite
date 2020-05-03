@@ -81,6 +81,10 @@ impl FunctionAstMap {
     pub(crate) fn pat(&self, id: &PatId) -> &Pattern {
         &self.hir_to_pattern[id]
     }
+
+    pub(crate) fn type_param(&self, id: &TypeParamId) -> &TypeParam {
+        &self.hir_to_type_params[id]
+    }
 }
 
 struct BodyMap {
