@@ -217,6 +217,7 @@ pub enum Expr {
     Call {
         callee: ExprId,
         args: Vec<ExprId>,
+        type_args: Vec<util::Span<TypeId>>,
     },
     Cast {
         expr: ExprId,

@@ -290,7 +290,19 @@ where
                     Vec::new()
                 };
 
-                hir::Expr::Call { callee, args }
+                let type_args = if let Some(type_args) = call_expr.type_args() {
+                    type_args
+                        .types()
+                        .map(|ty| self.lower_type(ty))
+                        .collect::<Vec<_>>()
+                } else {
+                    Vec::new()
+                };
+                hir::Expr::Call {
+                    callee,
+                    args,
+                    type_args,
+                }
             }
             ast::Expr::CastExpr(ref cast_expr) => {
                 let ty = self.lower_type(cast_expr.type_ref().unwrap());

@@ -3,7 +3,6 @@ use crate::{hir, util, TextRange};
 
 use errors::{FileId, Reporter, WithError};
 
-use hir::PatId;
 use std::{
     collections::{HashMap, HashSet},
     sync::Arc,
@@ -283,7 +282,11 @@ where
             }
 
             hir::Expr::Break | hir::Expr::Continue => {}
-            hir::Expr::Call { callee, args } => {
+            hir::Expr::Call {
+                callee,
+                args,
+                type_args,
+            } => {
                 self.resolve_expression(function, ast_map, callee);
 
                 args.iter()

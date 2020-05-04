@@ -14,8 +14,6 @@ where
     pub(crate) fn resolve_function(&mut self, function: &Function) -> Result<(), ()> {
         let name = function.name;
 
-        self.add_function(name, function.exported);
-
         self.begin_scope();
 
         let poly_tvs = function
@@ -69,7 +67,7 @@ where
         fn_name: &util::Span<NameId>,
         stmt: &StmtId,
         ast_map: &FunctionAstMap,
-    ) -> Result<(), ()> {
+    ) {
         let stmt = ast_map.stmt(stmt);
 
         match stmt {
@@ -87,8 +85,6 @@ where
                 if let Some(ascribed_type) = ascribed_type {
                     let _ = self.resolve_type(ascribed_type);
                 }
-
-                Ok(())
             }
             crate::hir::Stmt::Expr(expr) => self.resolve_expression(fn_name, expr, ast_map),
         }
