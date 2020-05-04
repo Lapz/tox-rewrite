@@ -37,8 +37,10 @@ pub fn resolve_imports_query(
 
             if segment.nested_imports.len() > 0 {
                 let exports = db.resolve_exports(*module)?;
+
                 for name in &segment.nested_imports {
-                    if !exports.has_export(name) {
+                    eprintln!("{:#?}  {:?}", exports.exported_items, name);
+                    if !exports.has_export(&name.item) {
                         reporter.error(
                             "Unresolved import",
                             format!(

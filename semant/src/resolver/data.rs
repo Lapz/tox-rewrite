@@ -13,7 +13,7 @@ pub(crate) struct ResolverDataCollector<DB> {
     pub(crate) ctx: Ctx,
     pub(crate) reporter: Reporter,
     pub(crate) items: HashSet<hir::NameId>,
-    pub(crate) exported_items: HashSet<util::Span<hir::NameId>>,
+    pub(crate) exported_items: HashSet<hir::NameId>,
     pub(crate) function_data: HashMap<hir::NameId, FunctionData>,
 }
 
@@ -21,7 +21,7 @@ pub(crate) struct ResolverDataCollector<DB> {
 pub struct Resolver {
     pub(crate) ctx: Ctx,
     pub(crate) items: HashSet<hir::NameId>,
-    pub(crate) exported_items: HashSet<util::Span<hir::NameId>>,
+    pub(crate) exported_items: HashSet<hir::NameId>,
     pub(crate) function_data: HashMap<hir::NameId, FunctionData>,
 }
 
@@ -58,7 +58,7 @@ impl FunctionData {
 }
 
 impl Resolver {
-    pub fn has_export(&self, id: &util::Span<hir::NameId>) -> bool {
+    pub fn has_export(&self, id: &hir::NameId) -> bool {
         self.exported_items.get(id).is_some()
     }
 }
@@ -97,7 +97,7 @@ where
             )
         } else {
             if exported {
-                self.exported_items.insert(name_id);
+                self.exported_items.insert(name_id.item);
             }
 
             self.items.insert(name_id.item);
