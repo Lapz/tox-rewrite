@@ -20,6 +20,6 @@ export fn main()  {
 
 
 
-export fn id<T>(a:T) -> (T,i32) {
+export fn id<T>(a:T,(x,x):T) -> (T,i32) {
     
 }

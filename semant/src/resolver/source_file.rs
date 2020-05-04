@@ -3,6 +3,7 @@ use crate::{hir, util, TextRange};
 
 use errors::{FileId, Reporter, WithError};
 
+use hir::PatId;
 use std::{
     collections::{HashMap, HashSet},
     sync::Arc,
@@ -30,7 +31,7 @@ pub(crate) struct Scopes {
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub(crate) struct FunctionData {
-    scopes: Vec<HashMap<hir::NameId, util::Span<State>>>,
+    pub(crate) scopes: Vec<HashMap<hir::NameId, util::Span<State>>>,
     locals: HashMap<util::Span<hir::NameId>, usize>,
 }
 

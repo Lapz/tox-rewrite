@@ -11,6 +11,8 @@ where
     pub(crate) fn resolve_function(&mut self, function: &Function) -> Result<(), ()> {
         let name = function.name;
 
+        self.add_function(name, function.exported);
+
         self.begin_scope();
 
         let poly_tvs = function
@@ -31,6 +33,8 @@ where
 
         for param in &function.params {
             let param = function.ast_map.param(&param.item);
+
+            let _ = self.resolve_pattern(function.name.item, &param.pat, &function.ast_map);
 
             signature.push(self.resolve_type(&param.ty)?);
         }
