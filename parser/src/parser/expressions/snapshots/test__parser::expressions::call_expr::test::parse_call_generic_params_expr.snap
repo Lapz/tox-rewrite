@@ -1,5 +1,5 @@
 ---
-created: "2020-05-02T10:42:46.953332Z"
+created: "2020-05-04T14:34:18.755169Z"
 creator: insta@0.8.2
 source: parser/src/parser/expressions/call_expr.rs
 expression: "crate::utils::dump_debug(&parser_output)"
@@ -23,11 +23,10 @@ SOURCE_FILE@[0; 26)
               NAME@[11; 19)
                 IDENT@[11; 12) "a"
                 COLON_COLON@[12; 14) "::"
-                TYPE_PARAM_LIST@[14; 19)
+                TYPE_ARG_LIST@[14; 19)
                   L_ANGLE@[14; 15) "<"
-                  TYPE_PARAM@[15; 18)
-                    IDENT_TYPE@[15; 18)
-                      IDENT@[15; 18) "i32"
+                  IDENT_TYPE@[15; 18)
+                    IDENT@[15; 18) "i32"
                   R_ANGLE@[18; 19) ">"
             ARG_LIST@[19; 24)
               L_PAREN@[19; 20) "("
