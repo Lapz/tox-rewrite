@@ -78,7 +78,6 @@ where
     /// Resolve a  pattern
     /// A pattern can occur in a fn param def
     /// or in a let statement
-
     pub(crate) fn resolve_pattern(
         &mut self,
         fn_name: NameId,

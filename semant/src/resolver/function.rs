@@ -1,9 +1,12 @@
+mod expression;
+
 use super::data::ResolverDataCollector;
 use crate::{
-    hir::Function,
+    hir::{Function, FunctionAstMap, NameId, StmtId},
     infer::{Type, TypeCon},
-    HirDatabase,
+    util, HirDatabase,
 };
+
 impl<'a, DB> ResolverDataCollector<&'a DB>
 where
     DB: HirDatabase,
@@ -50,8 +53,36 @@ where
             Type::Poly(poly_tvs, Box::new(Type::App(signature))),
         );
 
+        if let Some(body) = &function.body {
+            for stmt in body {
+                let _ = self.resolve_statement(&function.name, stmt, &function.ast_map);
+            }
+        }
+
         self.end_scope();
 
         Ok(())
+    }
+
+    pub(crate) fn resolve_statement(
+        &mut self,
+        fn_name: &util::Span<NameId>,
+        stmt: &StmtId,
+        ast_map: &FunctionAstMap,
+    ) -> Result<(), ()> {
+        let stmt = ast_map.stmt(stmt);
+
+        match stmt {
+            crate::hir::Stmt::Let { pat, initializer } => {
+                let _ = self.resolve_pattern(fn_name.item, pat, ast_map);
+
+                if let Some(expr) = initializer {
+                    let _ = self.resolve_expression(fn_name, expr, ast_map);
+                }
+
+                Ok(())
+            }
+            crate::hir::Stmt::Expr(expr) => self.resolve_expression(fn_name, expr, ast_map),
+        }
     }
 }
