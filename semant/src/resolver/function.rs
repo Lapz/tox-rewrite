@@ -73,11 +73,19 @@ where
         let stmt = ast_map.stmt(stmt);
 
         match stmt {
-            crate::hir::Stmt::Let { pat, initializer } => {
+            crate::hir::Stmt::Let {
+                pat,
+                initializer,
+                ascribed_type,
+            } => {
                 let _ = self.resolve_pattern(fn_name.item, pat, ast_map);
 
                 if let Some(expr) = initializer {
                     let _ = self.resolve_expression(fn_name, expr, ast_map);
+                }
+
+                if let Some(ascribed_type) = ascribed_type {
+                    let _ = self.resolve_type(ascribed_type);
                 }
 
                 Ok(())

@@ -10,7 +10,7 @@ export fn main()  {
     let x =10;
     let x =x;
 
-    let x:i32 = 19;
+    let x:i64 = 19;
     v=10;
 
     for(let i=0;i<10;i+=1) {

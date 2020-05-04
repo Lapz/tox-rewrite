@@ -175,7 +175,7 @@ impl<'a> Parser<'a> {
         match replace(&mut self.state, State::Normal) {
             State::PendingStart => {
                 self.builder.start_node(kind.into());
-                // No need to attach trivias to previous node: there is no
+                // No need to attach trivia's to previous node: there is no
                 // previous node.
                 return;
             }

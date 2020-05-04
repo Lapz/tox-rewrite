@@ -233,7 +233,11 @@ where
         let stmt = ast_map.stmt(stmt);
 
         match stmt {
-            hir::Stmt::Let { pat, initializer } => {
+            hir::Stmt::Let {
+                pat,
+                initializer,
+                ascribed_type,
+            } => {
                 self.resolve_pattern(function, ast_map, &pat.item);
 
                 if let Some(init) = initializer {

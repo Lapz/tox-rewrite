@@ -195,6 +195,7 @@ pub enum Type {
 pub enum Stmt {
     Let {
         pat: util::Span<PatId>,
+        ascribed_type: Option<util::Span<TypeId>>,
         initializer: Option<ExprId>,
     },
     Expr(ExprId),

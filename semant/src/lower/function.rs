@@ -234,7 +234,17 @@ where
                     None
                 };
 
-                hir::Stmt::Let { pat, initializer }
+                let ascribed_type = if let Some(ascribed_type) = let_stmt.ascribed_type() {
+                    Some(self.lower_type(ascribed_type))
+                } else {
+                    None
+                };
+
+                hir::Stmt::Let {
+                    pat,
+                    initializer,
+                    ascribed_type,
+                }
             }
             ast::Stmt::ExprStmt(ref expr_stmt) => {
                 hir::Stmt::Expr(self.lower_expr(expr_stmt.expr().unwrap()))
