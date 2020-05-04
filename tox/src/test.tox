@@ -1,6 +1,6 @@
 import foo::bar::{bar};
 
-type ParserResult<K> = Result<K,i32>;
+type ParserResult<K> = Result<T,i32>;
 
 mod bar;
 mod foo;
@@ -18,6 +18,8 @@ export fn main()  {
 }
 
 
-export fn main() {
+
+
+export fn id<T>(a:T) -> (T,i32) {
     
 }

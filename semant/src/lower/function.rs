@@ -32,18 +32,20 @@ where
         id: hir::FunctionId,
         name: util::Span<hir::NameId>,
         body: Option<Vec<hir::StmtId>>,
+        returns: Option<util::Span<hir::TypeId>>,
         span: TextRange,
     ) -> hir::Function {
         let params = self.params;
         let type_params = self.type_params;
-        let map = self.ast_map;
+        let ast_map = self.ast_map;
         hir::Function {
             id,
             exported,
             name,
-            map,
+            ast_map,
             params,
             type_params,
+            returns,
             body,
             span,
         }
@@ -133,6 +135,8 @@ where
 
         self.ast_map
             .insert_type_param(id, type_param, AstPtr::new(ast_node));
+
+        self.type_params.push(util::Span::from_ast(id, ast_node))
     }
 
     pub(crate) fn lower_pattern(&mut self, pat: ast::Pat) -> util::Span<hir::PatId> {
@@ -465,9 +469,15 @@ pub(crate) fn lower_function_query(
         None
     };
 
+    let returns = if let Some(ret) = function.ret_type() {
+        Some(collector.lower_type(ret.type_ref().unwrap()))
+    } else {
+        None
+    };
+
     let span = function.syntax().text_range();
 
     let name = util::Span::from_ast(db.intern_name(name.unwrap()), &function.name().unwrap());
 
-    Arc::new(collector.finish(exported, fun_id, name, body, span))
+    Arc::new(collector.finish(exported, fun_id, name, body, returns, span))
 }

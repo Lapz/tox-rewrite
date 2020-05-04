@@ -51,10 +51,11 @@ pub struct Function {
     pub(crate) id: FunctionId,
     pub(crate) exported: bool,
     pub(crate) name: util::Span<NameId>,
-    pub(crate) map: FunctionAstMap,
+    pub(crate) ast_map: FunctionAstMap,
     pub(crate) params: Vec<util::Span<ParamId>>,
     pub(crate) type_params: Vec<util::Span<TypeParamId>>,
     pub(crate) body: Option<Vec<StmtId>>,
+    pub(crate) returns: Option<util::Span<TypeId>>,
     pub(crate) span: TextRange,
 }
 /// A symbol is composed of a name and the file it belongs to
@@ -363,6 +364,6 @@ impl Function {
     }
 
     pub(crate) fn map(&self) -> &FunctionAstMap {
-        &self.map
+        &self.ast_map
     }
 }

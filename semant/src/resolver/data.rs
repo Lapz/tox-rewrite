@@ -4,12 +4,15 @@ use crate::{
     util, Ctx, HirDatabase,
 };
 use errors::{FileId, Reporter, WithError};
+use std::collections::HashSet;
 
 #[derive(Debug)]
 pub(crate) struct ResolverDataCollector<DB> {
     db: DB,
     pub(crate) ctx: Ctx,
     pub(crate) reporter: Reporter,
+    pub(crate) items: HashSet<hir::NameId>,
+    pub(crate) exported_items: HashSet<hir::NameId>,
 }
 
 impl<'a, DB> ResolverDataCollector<&'a DB>
@@ -113,12 +116,24 @@ pub fn resolve_file_query(db: &impl HirDatabase, file: FileId) -> WithError<()> 
 
     let ctx = Ctx::new(db);
 
-    let mut collector = ResolverDataCollector { db, reporter, ctx };
+    let mut collector = ResolverDataCollector {
+        db,
+        reporter,
+        ctx,
+        items: HashSet::new(),
+        exported_items: HashSet::new(),
+    };
 
     for alias in &source_file.type_alias {
         if let Err(_) = collector.resolve_alias(alias) {
             continue;
         };
+    }
+
+    for function in &source_file.functions {
+        if let Err(_) = collector.resolve_function(function) {
+            continue;
+        }
     }
 
     let (_ctx, reporter) = collector.finish();

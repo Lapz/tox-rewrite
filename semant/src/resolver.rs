@@ -1,5 +1,6 @@
 mod alias;
 mod data;
+mod function;
 mod imports;
 mod module;
 mod module_graph;

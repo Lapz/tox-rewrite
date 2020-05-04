@@ -10,8 +10,6 @@ where
 
         self.begin_scope();
 
-        println!("{:?}", alias.type_params);
-
         let poly_tvs = alias
             .type_params
             .iter()
