@@ -1,5 +1,5 @@
 use crate::hir;
-use crate::HirDatabase;
+use crate::{util, HirDatabase};
 use errors::FileId;
 use std::sync::Arc;
 
@@ -16,7 +16,7 @@ pub(crate) fn lower_import_query(
     for segment in import.segments() {
         let name = segment.name().map(|name| name.into());
 
-        let name = db.intern_name(name.unwrap());
+        let name = util::Span::from_ast(db.intern_name(name.unwrap()), &segment.name().unwrap());
 
         let nested_imports = Vec::new();
 
@@ -33,7 +33,8 @@ pub(crate) fn lower_import_query(
             let name = segment.name().map(|name| name.into());
 
             let name = db.intern_name(name.unwrap());
-            last.nested_imports.push(name);
+            last.nested_imports
+                .push(util::Span::from_ast(name, &segment.name().unwrap()));
         }
     } else if import.segments().count() > 1 {
         // only when we have import foo::something

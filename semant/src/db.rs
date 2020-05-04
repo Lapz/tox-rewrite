@@ -1,4 +1,7 @@
-use crate::{hir, resolver::FileTable, resolver::ModuleGraph};
+use crate::{
+    hir,
+    resolver::{ModuleGraph, Resolver},
+};
 use errors::{FileId, WithError};
 use parser::ParseDatabase;
 
@@ -47,16 +50,13 @@ pub trait HirDatabase: std::fmt::Debug + InternDatabase + ParseDatabase {
     #[salsa::invoke(crate::lower::lower_query)]
     fn lower(&self, file: FileId) -> WithError<Arc<hir::SourceFile>>;
     #[salsa::invoke(crate::resolver::resolve_exports_query)]
-    fn resolve_exports(&self, file: FileId) -> WithError<Arc<FileTable>>;
+    fn resolve_exports(&self, file: FileId) -> WithError<Arc<Resolver>>;
     #[salsa::invoke(crate::resolver::resolve_modules_query)]
     fn resolve_modules(&self, file: FileId, module: hir::ModuleId) -> WithError<FileId>;
     #[salsa::invoke(crate::resolver::resolve_source_file_query)]
-    fn resolve_source_file(&self, file: FileId) -> WithError<()>;
+    fn resolve_source_file(&self, file: FileId) -> WithError<Arc<Resolver>>;
     #[salsa::invoke(crate::resolver::resolve_imports_query)]
     fn resolve_import(&self, file: FileId, import: hir::ImportId) -> WithError<()>;
-
-    #[salsa::invoke(crate::resolver::resolve_file_query)]
-    fn resolve_file(&self, file: FileId) -> WithError<()>;
 
     #[salsa::invoke(crate::resolver::module_graph_query)]
     fn module_graph(&self, file: FileId) -> WithError<ModuleGraph>;

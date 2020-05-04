@@ -26,17 +26,14 @@ pub fn resolve_imports_query(
     let mut nodes = nodes.unwrap();
 
     for segment in &import.segments {
-        if let Some(module) = nodes.get(&segment.name) {
+        if let Some(module) = nodes.get(&segment.name.item) {
             let next_node = module_graphs.try_get_node(&module);
 
             let mut next_node = next_node.unwrap();
 
             std::mem::swap(&mut next_node, &mut nodes);
 
-            import_err.push_str(&format!(
-                "{}::",
-                db.lookup_intern_name(segment.name).as_str()
-            ));
+            import_err.push_str(&format!("{}::", db.lookup_intern_name(segment.name.item)));
 
             if segment.nested_imports.len() > 0 {
                 let exports = db.resolve_exports(*module)?;
@@ -46,7 +43,7 @@ pub fn resolve_imports_query(
                             "Unresolved import",
                             format!(
                                 "Couldn't find the import `{}`",
-                                format!("{}{}", import_err, db.lookup_intern_name(*name)),
+                                format!("{}{}", import_err, db.lookup_intern_name(name.item)),
                             ),
                             span,
                         );
@@ -54,7 +51,7 @@ pub fn resolve_imports_query(
                 }
             }
         } else {
-            import_err.push_str(db.lookup_intern_name(segment.name).as_str());
+            import_err.push_str(db.lookup_intern_name(segment.name.item).as_str());
 
             reporter.error(
                 "Unresolved module when finding import",

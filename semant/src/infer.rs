@@ -3,10 +3,9 @@ mod alias;
 mod ctx;
 mod infer;
 mod stacked_map;
-mod transform_type;
 mod ty;
-pub(crate) use alias::infer_alias;
+
 pub use ctx::Ctx;
 pub(crate) use infer::infer_query;
-pub(crate) use transform_type::transform_type;
+
 pub(crate) use ty::{Type, TypeCon};

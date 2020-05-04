@@ -3,7 +3,7 @@ use crate::{hir, util};
 
 use std::sync::Arc;
 
-use syntax::{ast, AstNode, AstPtr, NameOwner, TypeParamsOwner, TypesOwner};
+use syntax::{ast, AstNode, NameOwner, TypeParamsOwner, TypesOwner};
 #[derive(Debug)]
 pub(crate) struct TypeAliasDataCollector<DB> {
     db: DB,
@@ -44,8 +44,7 @@ where
 
         let id = hir::TypeParamId(current);
 
-        self.ast_map
-            .insert_type_param(id, type_param, AstPtr::new(ast_node));
+        self.ast_map.insert_type_param(id, type_param);
         self.type_params.push(util::Span::from_ast(id, ast_node));
     }
 

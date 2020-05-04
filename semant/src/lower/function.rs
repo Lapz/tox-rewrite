@@ -4,8 +4,8 @@ use errors::FileId;
 use std::sync::Arc;
 
 use syntax::{
-    ast, ArgListOwner, AstNode, AstPtr, LoopBodyOwner, NameOwner, TypeAscriptionOwner,
-    TypeParamsOwner, TypesOwner, VisibilityOwner,
+    ast, ArgListOwner, AstNode, LoopBodyOwner, NameOwner, TypeAscriptionOwner, TypeParamsOwner,
+    TypesOwner, VisibilityOwner,
 };
 
 #[derive(Debug)]
@@ -29,7 +29,6 @@ where
     pub fn finish(
         self,
         exported: bool,
-        id: hir::FunctionId,
         name: util::Span<hir::NameId>,
         body: Option<Vec<hir::StmtId>>,
         returns: Option<util::Span<hir::TypeId>>,
@@ -39,7 +38,6 @@ where
         let type_params = self.type_params;
         let ast_map = self.ast_map;
         hir::Function {
-            id,
             exported,
             name,
             ast_map,
@@ -58,7 +56,7 @@ where
 
         let id = hir::ParamId(current);
 
-        self.ast_map.insert_param(id, param, AstPtr::new(ast_node));
+        self.ast_map.insert_param(id, param);
 
         self.params.push(util::Span::from_ast(id, ast_node));
     }
@@ -67,61 +65,55 @@ where
         let current = self.pat_id_count;
         self.pat_id_count += 1;
         let id = hir::PatId(current);
-        self.ast_map.insert_pat(id, pat, AstPtr::new(ast_node));
+        self.ast_map.insert_pat(id, pat);
 
         util::Span::from_ast(id, ast_node)
     }
 
-    pub fn add_stmt(&mut self, ast_node: &ast::Stmt, stmt: hir::Stmt) -> hir::StmtId {
+    pub fn add_stmt(&mut self, stmt: hir::Stmt) -> hir::StmtId {
         let current = self.stmt_id_count;
 
         self.stmt_id_count += 1;
 
         let id = hir::StmtId(current);
 
-        self.ast_map.insert_stmt(id, stmt, AstPtr::new(ast_node));
+        self.ast_map.insert_stmt(id, stmt);
 
         id
     }
 
     pub fn expr_to_stmt(&mut self, expr: hir::ExprId) -> hir::StmtId {
-        let node = self.ast_map.get_expr_ptr(expr);
-
         let current = self.stmt_id_count;
 
         self.stmt_id_count += 1;
 
         let id = hir::StmtId(current);
 
-        self.ast_map.insert_stmt(
-            id,
-            hir::Stmt::Expr(expr),
-            AstPtr::from_ptr(node.syntax_node_ptr()),
-        );
+        self.ast_map.insert_stmt(id, hir::Stmt::Expr(expr));
 
         id
     }
 
-    pub fn add_expr(&mut self, ast_node: &ast::Expr, expr: hir::Expr) -> hir::ExprId {
+    pub fn add_expr(&mut self, expr: hir::Expr) -> hir::ExprId {
         let current = self.expr_id_count;
 
         self.expr_id_count += 1;
 
         let id = hir::ExprId(current);
 
-        self.ast_map.insert_expr(id, expr, AstPtr::new(ast_node));
+        self.ast_map.insert_expr(id, expr);
 
         id
     }
 
-    pub fn add_block(&mut self, ast_node: &ast::Block, block: hir::Block) -> hir::BlockId {
+    pub fn add_block(&mut self, block: hir::Block) -> hir::BlockId {
         let current = self.block_id_count;
 
         self.block_id_count += 1;
 
         let id = hir::BlockId(current);
 
-        self.ast_map.insert_block(id, block, AstPtr::new(ast_node));
+        self.ast_map.insert_block(id, block);
 
         id
     }
@@ -133,8 +125,7 @@ where
 
         let id = hir::TypeParamId(current);
 
-        self.ast_map
-            .insert_type_param(id, type_param, AstPtr::new(ast_node));
+        self.ast_map.insert_type_param(id, type_param);
 
         self.type_params.push(util::Span::from_ast(id, ast_node))
     }
@@ -251,7 +242,7 @@ where
             }
         };
 
-        self.add_stmt(&node, hir_stmt)
+        self.add_stmt(hir_stmt)
     }
 
     pub fn lower_expr(&mut self, node: ast::Expr) -> hir::ExprId {
@@ -268,7 +259,6 @@ where
                 hir::Expr::Binary { lhs, op, rhs }
             }
             ast::Expr::BlockExpr(ref block) => {
-                let node = block.block().unwrap();
                 let block = hir::Block(
                     block
                         .block()
@@ -278,7 +268,7 @@ where
                         .collect(),
                 );
 
-                hir::Expr::Block(self.add_block(&node, block))
+                hir::Expr::Block(self.add_block(block))
             }
 
             ast::Expr::BreakExpr(_) => hir::Expr::Break,
@@ -298,6 +288,7 @@ where
                 } else {
                     Vec::new()
                 };
+
                 hir::Expr::Call {
                     callee,
                     args,
@@ -333,13 +324,13 @@ where
 
                 let body_block = hir::Block(body);
 
-                let body = self.add_block(&loop_body, body_block);
+                let body = self.add_block(body_block);
 
-                let while_expr = self.add_expr(&node, hir::Expr::While { cond, body });
+                let while_expr = self.add_expr(hir::Expr::While { cond, body });
 
                 let block = hir::Block(vec![init, self.expr_to_stmt(while_expr)]);
 
-                let block = self.add_block(&loop_body, block);
+                let block = self.add_block(block);
 
                 hir::Expr::Block(block)
             }
@@ -425,7 +416,7 @@ where
                         .collect::<Vec<_>>(),
                 );
 
-                let body = self.add_block(&loop_body, block);
+                let body = self.add_block(block);
 
                 hir::Expr::While { cond, body }
             }
@@ -439,7 +430,7 @@ where
             }
         };
 
-        self.add_expr(&node, expr)
+        self.add_expr(expr)
     }
 }
 
@@ -501,5 +492,5 @@ pub(crate) fn lower_function_query(
 
     let name = util::Span::from_ast(db.intern_name(name.unwrap()), &function.name().unwrap());
 
-    Arc::new(collector.finish(exported, fun_id, name, body, returns, span))
+    Arc::new(collector.finish(exported, name, body, returns, span))
 }

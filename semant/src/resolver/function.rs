@@ -11,7 +11,7 @@ impl<'a, DB> ResolverDataCollector<&'a DB>
 where
     DB: HirDatabase,
 {
-    pub(crate) fn resolve_function(&mut self, function: &Function) -> Result<(), ()> {
+    pub fn resolve_function(&mut self, function: &Function) -> Result<(), ()> {
         let name = function.name;
 
         self.begin_scope();

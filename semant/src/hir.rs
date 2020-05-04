@@ -42,13 +42,12 @@ pub struct Import {
 }
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Segment {
-    pub(crate) name: NameId,
-    pub(crate) nested_imports: Vec<NameId>,
+    pub(crate) name: util::Span<NameId>,
+    pub(crate) nested_imports: Vec<util::Span<NameId>>,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub struct Function {
-    pub(crate) id: FunctionId,
     pub(crate) exported: bool,
     pub(crate) name: util::Span<NameId>,
     pub(crate) ast_map: FunctionAstMap,
@@ -357,15 +356,5 @@ impl Literal {
             T![nil] => Literal::Nil,
             _ => unreachable!(),
         }
-    }
-}
-
-impl Function {
-    pub(crate) fn body(&self) -> &Option<Vec<StmtId>> {
-        &self.body
-    }
-
-    pub(crate) fn map(&self) -> &FunctionAstMap {
-        &self.ast_map
     }
 }

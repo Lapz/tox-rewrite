@@ -1,10 +1,9 @@
-use super::source_file::{FunctionData, State};
 use crate::{
     hir::{self, NameId, TypeId},
     infer::{Type, TypeCon},
     util, Ctx, HirDatabase,
 };
-use errors::{FileId, Reporter, WithError};
+use errors::Reporter;
 use hir::PatId;
 use std::collections::{HashMap, HashSet};
 
@@ -18,12 +17,66 @@ pub(crate) struct ResolverDataCollector<DB> {
     pub(crate) function_data: HashMap<hir::NameId, FunctionData>,
 }
 
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct Resolver {
+    pub(crate) ctx: Ctx,
+    pub(crate) items: HashSet<hir::NameId>,
+    pub(crate) exported_items: HashSet<util::Span<hir::NameId>>,
+    pub(crate) function_data: HashMap<hir::NameId, FunctionData>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum State {
+    Declared,
+    Defined,
+    Read,
+}
+
+#[derive(Clone, Debug, Default)]
+pub(crate) struct Scopes {
+    scopes: Vec<HashMap<hir::NameId, State>>,
+    len: usize,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
+pub(crate) struct FunctionData {
+    pub(crate) scopes: Vec<HashMap<hir::NameId, util::Span<State>>>,
+    locals: HashMap<util::Span<hir::NameId>, usize>,
+}
+
+impl FunctionData {
+    pub fn new() -> Self {
+        Self {
+            scopes: vec![HashMap::new()],
+            ..Self::default()
+        }
+    }
+
+    pub(crate) fn peek(&self) -> usize {
+        self.scopes.len() - 1
+    }
+}
+
+impl Resolver {
+    pub fn has_export(&self, id: &util::Span<hir::NameId>) -> bool {
+        self.exported_items.get(id).is_some()
+    }
+}
+
 impl<'a, DB> ResolverDataCollector<&'a DB>
 where
     DB: HirDatabase,
 {
-    pub fn finish(self) -> (Ctx, Reporter) {
-        (self.ctx, self.reporter)
+    pub fn finish(self) -> (Resolver, Reporter) {
+        (
+            Resolver {
+                ctx: self.ctx,
+                items: self.items,
+                exported_items: self.exported_items,
+                function_data: self.function_data,
+            },
+            self.reporter,
+        )
     }
     pub(crate) fn begin_scope(&mut self) {
         self.ctx.begin_scope();
@@ -117,6 +170,16 @@ where
         }
     }
 
+    pub(crate) fn define_local(&mut self, fn_name: &NameId, name: &util::Span<NameId>) {
+        let scope = self.resolve_function_scope(*fn_name);
+
+        let function_data = self.function_data.get_mut(&fn_name).unwrap();
+        function_data.scopes[scope].insert(
+            name.item,
+            util::Span::new(State::Defined, name.start(), name.end()),
+        );
+    }
+
     pub(crate) fn begin_function_scope(&mut self, fn_name: NameId) {
         let function_data = self.function_data.get_mut(&fn_name).unwrap();
 
@@ -149,7 +212,10 @@ where
         let pat = ast_map.pat(&pat_id.item);
 
         match pat {
-            hir::Pattern::Bind { name } => self.add_local(fn_name, *name),
+            hir::Pattern::Bind { name } => {
+                self.add_local(fn_name, *name);
+                self.define_local(&fn_name, name);
+            }
             hir::Pattern::Tuple(patterns) => {
                 for pat in patterns {
                     self.resolve_pattern(fn_name, pat, ast_map)
@@ -235,46 +301,5 @@ where
                 Err(())
             }
         }
-    }
-}
-
-pub fn resolve_file_query(db: &impl HirDatabase, file: FileId) -> WithError<()> {
-    let source_file = db.lower(file)?;
-
-    let reporter = Reporter::new(file);
-
-    let ctx = Ctx::new(db);
-
-    let mut collector = ResolverDataCollector {
-        db,
-        reporter,
-        ctx,
-        items: HashSet::new(),
-        exported_items: HashSet::new(),
-        function_data: HashMap::new(),
-    };
-
-    for function in &source_file.functions {
-        collector.add_function(function.name, function.exported);
-    }
-
-    for alias in &source_file.type_alias {
-        if let Err(_) = collector.resolve_alias(alias) {
-            continue;
-        };
-    }
-
-    for function in &source_file.functions {
-        if let Err(_) = collector.resolve_function(function) {
-            continue;
-        }
-    }
-
-    let (_ctx, reporter) = collector.finish();
-
-    if reporter.has_errors() {
-        Err(reporter.finish())
-    } else {
-        Ok(())
     }
 }
