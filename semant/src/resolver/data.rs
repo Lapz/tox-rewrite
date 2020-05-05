@@ -40,18 +40,22 @@ pub enum State {
     Defined,
     Read,
 }
+/// Information at a local variable declared in a block
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+pub struct LocalData {
+    state: util::Span<State>,
+    reads: usize,
+}
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub(crate) struct FunctionData {
-    pub(crate) scopes: Vec<HashMap<hir::NameId, util::Span<State>>>,
-    locals: HashMap<util::Span<hir::NameId>, usize>,
+    pub(crate) scopes: Vec<HashMap<hir::NameId, LocalData>>,
 }
 
 impl FunctionData {
     pub fn new() -> Self {
         Self {
             scopes: vec![HashMap::new()],
-            ..Self::default()
         }
     }
 
@@ -143,7 +147,8 @@ where
         for i in 0..max_scopes {
             if data.scopes[max_scopes - i - 1].contains_key(&name.item) {
                 if let Some(state) = data.scopes[max_scopes - i - 1].get_mut(&name.item) {
-                    *state = util::Span::new(State::Read, name.start(), name.end())
+                    state.state = util::Span::new(State::Read, name.start(), name.end());
+                    state.reads += 1;
                 }
 
                 return; // reduce work done
@@ -193,7 +198,10 @@ where
         let function_data = self.function_data.get_mut(&fn_name).unwrap();
         function_data.scopes[scope].insert(
             param.item,
-            util::Span::new(State::Declared, param.start(), param.end()),
+            LocalData {
+                state: util::Span::new(State::Declared, param.start(), param.end()),
+                reads: 0,
+            },
         );
     }
 
@@ -201,7 +209,7 @@ where
         let scope = self.resolve_function_scope(*fn_name);
 
         if let Some(state) = self.function_data[fn_name].scopes[scope].get(&name.item) {
-            return state.item == State::Declared;
+            return state.state.item == State::Declared;
         } else {
             false
         }
@@ -213,7 +221,10 @@ where
         let function_data = self.function_data.get_mut(&fn_name).unwrap();
         function_data.scopes[scope].insert(
             name.item,
-            util::Span::new(State::Defined, name.start(), name.end()),
+            LocalData {
+                state: util::Span::new(State::Defined, name.start(), name.end()),
+                reads: 0,
+            },
         );
     }
 
@@ -229,7 +240,9 @@ where
         let scope = function_data.scopes.pop().unwrap();
 
         for (name, state) in &scope {
-            if state.item == State::Declared {
+            let LocalData { reads, state } = state;
+
+            if state.item == State::Declared || *reads == 0 {
                 let msg = format!("Unused variable `{}`", self.db.lookup_intern_name(*name));
                 self.reporter
                     .warn(msg, "", (state.start().to_usize(), state.end().to_usize()))

@@ -40,19 +40,22 @@ where
             signature.push(self.resolve_type(&param.ty)?);
         }
 
-        self.end_function_scope(name.item);
-
         if let Some(returns) = &function.returns {
             signature.push(self.resolve_type(&returns)?)
         } else {
             signature.push(Type::Con(TypeCon::Void))
         }
 
+        self.begin_function_scope(name.item);
+
         if let Some(body) = &function.body {
             for stmt in body {
                 let _ = self.resolve_statement(&function.name, stmt, &function.ast_map);
             }
         }
+
+        self.end_function_scope(name.item);
+        self.end_function_scope(name.item);
 
         self.end_scope();
 
