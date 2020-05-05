@@ -17,6 +17,14 @@ pub(crate) struct ResolverDataCollector<DB> {
     pub(crate) function_data: HashMap<hir::NameId, FunctionData>,
 }
 
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub enum TypeKind {
+    Function,
+    Alias,
+    Enum,
+    Type,
+}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Resolver {
     pub(crate) ctx: Ctx,
@@ -86,7 +94,12 @@ where
         self.ctx.end_scope();
     }
 
-    pub(crate) fn insert_type(&mut self, name_id: &util::Span<NameId>, ty: Type) -> Result<(), ()> {
+    pub(crate) fn insert_type(
+        &mut self,
+        name_id: &util::Span<NameId>,
+        ty: Type,
+        kind: TypeKind,
+    ) -> Result<(), ()> {
         if self.ctx.get_type(&name_id.item).is_some() {
             let name = self.db.lookup_intern_name(name_id.item);
 
@@ -98,7 +111,7 @@ where
 
             Err(())
         } else {
-            self.ctx.insert_type(name_id.item, ty);
+            self.ctx.insert_type(name_id.item, ty, kind);
             Ok(())
         }
     }
@@ -292,6 +305,20 @@ where
                     }
                 };
 
+                if self.ctx.get_kind(&name) == TypeKind::Function {
+                    let span = (id.start().to_usize(), id.end().to_usize());
+                    self.reporter.error(
+                        format!(
+                            "Expected a type found `{}`",
+                            self.db.lookup_intern_name(name)
+                        ),
+                        "A function cannot be used as a type",
+                        span,
+                    );
+
+                    return Err(());
+                }
+
                 for arg in &type_args {
                     if let Err(()) = self.resolve_type(arg) {
                         continue;
@@ -302,6 +329,19 @@ where
             }
             hir::Type::Ident(name) => {
                 if let Some(ty) = self.ctx.get_type(&name) {
+                    if self.ctx.get_kind(&name) == TypeKind::Function {
+                        let span = (id.start().to_usize(), id.end().to_usize());
+                        self.reporter.error(
+                            format!(
+                                "Expected a type found `{}`",
+                                self.db.lookup_intern_name(name)
+                            ),
+                            "A function cannot be used as a type",
+                            span,
+                        );
+
+                        return Err(());
+                    }
                     return Ok(ty);
                 }
 

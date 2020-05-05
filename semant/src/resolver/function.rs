@@ -1,6 +1,6 @@
 mod expression;
 
-use super::data::ResolverDataCollector;
+use super::{data::ResolverDataCollector, TypeKind};
 use crate::{
     hir::{Function, FunctionAstMap, NameId, StmtId},
     infer::{Type, TypeCon},
@@ -23,7 +23,7 @@ where
 
             let tv = self.ctx.type_var();
 
-            self.insert_type(&type_param.name, Type::Var(tv))?;
+            self.insert_type(&type_param.name, Type::Var(tv), TypeKind::Type)?;
 
             poly_tvs.push(tv);
         }
@@ -52,7 +52,11 @@ where
 
         self.end_scope();
 
-        self.insert_type(&name, Type::Poly(poly_tvs, Box::new(Type::App(signature))))?;
+        self.insert_type(
+            &name,
+            Type::Poly(poly_tvs, Box::new(Type::App(signature))),
+            TypeKind::Function,
+        )?;
 
         Ok(())
     }

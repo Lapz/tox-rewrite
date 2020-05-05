@@ -1,3 +1,4 @@
+use super::TypeKind;
 use crate::{
     hir::{ImportId, NameId},
     infer::Type,
@@ -9,7 +10,7 @@ pub fn resolve_imports_query(
     db: &impl HirDatabase,
     file: FileId,
     import_id: ImportId,
-) -> WithError<Vec<(NameId, Type)>> {
+) -> WithError<Vec<(NameId, Type, TypeKind)>> {
     let mut reporter = Reporter::new(file);
     let import = db.lower_import(file, import_id);
     let module_graphs = db.module_graph(file)?;
@@ -59,7 +60,7 @@ pub fn resolve_imports_query(
                     }
 
                     if let Some(ty) = exports.ctx.get_type(&name.item) {
-                        imported_types.push((name.item, ty))
+                        imported_types.push((name.item, ty, exports.ctx.get_kind(&name.item)))
                     } else {
                         eprintln!(
                             "Found an import but couldn't find its type in the ctx; id {:?} name {}",
