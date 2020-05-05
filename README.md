@@ -17,6 +17,8 @@ It's built using salsa and rowan and codespan. The design is inspired by rust-an
 
 - [x] Error when type is defined multiple times
 - [x] Add resolve imports to ctx
+- [x] Error when a function is used as a type
+- [x] Error on duplicate pattern bindings in the same statement
 - [ ] Warn on unused pattern variable
 - [ ] Infer types
 - [ ] Resolve external imports

@@ -30,6 +30,8 @@ where
 
         let mut signature = Vec::new();
 
+        self.begin_function_scope(name.item);
+
         for param in &function.params {
             let param = function.ast_map.param(&param.item);
 
@@ -37,6 +39,8 @@ where
 
             signature.push(self.resolve_type(&param.ty)?);
         }
+
+        self.end_function_scope(name.item);
 
         if let Some(returns) = &function.returns {
             signature.push(self.resolve_type(&returns)?)

@@ -14,6 +14,7 @@ pub(crate) struct ResolverDataCollector<DB> {
     pub(crate) reporter: Reporter,
     pub(crate) items: HashSet<hir::NameId>,
     pub(crate) exported_items: HashSet<hir::NameId>,
+    pub(crate) binding_error: bool,
     pub(crate) function_data: HashMap<hir::NameId, FunctionData>,
 }
 
@@ -38,12 +39,6 @@ pub enum State {
     Declared,
     Defined,
     Read,
-}
-
-#[derive(Clone, Debug, Default)]
-pub(crate) struct Scopes {
-    scopes: Vec<HashMap<hir::NameId, State>>,
-    len: usize,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
@@ -174,13 +169,25 @@ where
         let scope = self.resolve_function_scope(fn_name);
 
         if self.function_data[&fn_name].scopes[scope].contains_key(&param.item) {
-            let msg = format!(
-                "The identifier `{}` has already been declared.",
-                self.db.lookup_intern_name(param.item)
-            );
+            let msg = if self.binding_error {
+                format!(
+                    "Duplicate binding `{}`",
+                    self.db.lookup_intern_name(param.item)
+                )
+            } else {
+                format!(
+                    "The identifier `{}` has already been declared.",
+                    self.db.lookup_intern_name(param.item)
+                )
+            };
 
-            self.reporter
-                .warn(msg, "", (param.start().to_usize(), param.end().to_usize()))
+            if self.binding_error {
+                self.reporter
+                    .error(msg, "", (param.start().to_usize(), param.end().to_usize()))
+            } else {
+                self.reporter
+                    .warn(msg, "", (param.start().to_usize(), param.end().to_usize()))
+            }
         }
 
         let function_data = self.function_data.get_mut(&fn_name).unwrap();
@@ -233,6 +240,7 @@ where
     /// Resolve a  pattern
     /// A pattern can occur in a fn param def
     /// or in a let statement
+
     pub(crate) fn resolve_pattern(
         &mut self,
         fn_name: NameId,
@@ -247,9 +255,16 @@ where
                 self.define_local(&fn_name, name);
             }
             hir::Pattern::Tuple(patterns) => {
+                // When resolving a tuple pat
+                // Multiple of the same binding is a hard error
+
+                self.binding_error = true;
+
                 for pat in patterns {
                     self.resolve_pattern(fn_name, pat, ast_map)
                 }
+
+                self.binding_error = false;
             }
             hir::Pattern::Placeholder | hir::Pattern::Literal(_) => {}
         }

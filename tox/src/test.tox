@@ -23,6 +23,6 @@ export fn main()  {
 
 
 export fn id<T>(a:T,(x,x):T) -> (T,i32) {
-    let x= 10;
+    let (y,(x,y)) = 10;
     let x =10;
 }

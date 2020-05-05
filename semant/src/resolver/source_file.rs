@@ -14,10 +14,11 @@ pub fn resolve_exports_query(db: &impl HirDatabase, file: FileId) -> WithError<A
     let ctx = Ctx::new(db);
     let mut collector = ResolverDataCollector {
         db,
-        reporter,
         ctx,
+        reporter,
         items: HashSet::new(),
         exported_items: HashSet::new(),
+        binding_error: false,
         function_data: HashMap::new(),
     };
 
@@ -43,10 +44,11 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
 
     let mut collector = ResolverDataCollector {
         db,
-        reporter,
         ctx,
+        reporter,
         items: HashSet::new(),
         exported_items: HashSet::new(),
+        binding_error: false,
         function_data: HashMap::new(),
     };
 
