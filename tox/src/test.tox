@@ -5,7 +5,7 @@ type ParserResult<T> = Result<T,Foo>;
 mod bar;
 mod foo;
 
-export fn main()  { 
+/*export fn main()  { 
     let x= 10;
     let x =10;
     let x =x;
@@ -20,7 +20,7 @@ export fn main()  {
 
     
     if true {print("good")} else {print("bad")};
-}
+}*/
 
 
 

@@ -23,6 +23,10 @@ impl<K: Hash + Eq + Copy + Clone, V: Clone> StackedMap<K, V> {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.scopes.len()
+    }
+
     pub fn begin_scope(&mut self) {
         self.scopes.push(None);
     }

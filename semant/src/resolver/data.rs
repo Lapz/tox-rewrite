@@ -1,6 +1,6 @@
 use crate::{
     hir::{self, NameId, TypeId},
-    infer::{Type, TypeCon},
+    infer::{StackedMap, Type, TypeCon},
     util, Ctx, HirDatabase,
 };
 use errors::Reporter;
@@ -47,14 +47,14 @@ pub struct LocalData {
     reads: usize,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct FunctionData {
-    pub(crate) scopes: Vec<HashMap<hir::NameId, LocalData>>,
+    pub(crate) scopes: StackedMap<hir::NameId, LocalData>,
 }
 
 impl FunctionData {
     pub fn new() -> Self {
-        Self { scopes: vec![] }
+        Self { scopes: StackedMap::new() }
     }
 
     pub(crate) fn peek(&self) -> usize {
@@ -142,7 +142,7 @@ where
 
         let max_scopes = data.scopes.len();
 
-        for i in 0..max_scopes {
+        for i in (0..max_scopes).rev() {
             if data.scopes[max_scopes - i - 1].contains_key(&name.item) {
                 if let Some(state) = data.scopes[max_scopes - i - 1].get_mut(&name.item) {
                     state.state = util::Span::new(State::Read, name.start(), name.end());
@@ -242,7 +242,15 @@ where
         for (name, state) in &scope {
             let LocalData { reads, state } = state;
 
-            if state.item == State::Declared || *reads == 0 {
+            println!(
+                "{:?} {:?} {:?} {:?}",
+                name,
+                self.db.lookup_intern_name(*name),
+                reads,
+                state
+            );
+
+            if *reads == 0 || state.item == State::Declared {
                 let msg = format!("Unused variable `{}`", self.db.lookup_intern_name(*name));
                 self.reporter
                     .warn(msg, "", (state.start().to_usize(), state.end().to_usize()))
