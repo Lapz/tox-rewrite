@@ -26,7 +26,7 @@ mod foo;
 
 
 export fn id<T>(a:T,(x,z):T) -> (T,i32) {
-    let (y,(x,y)) = 10;
+    let (y,(x,a)) = 10;
     
     let x =10;
 }

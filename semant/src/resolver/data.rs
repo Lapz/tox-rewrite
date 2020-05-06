@@ -54,11 +54,9 @@ pub(crate) struct FunctionData {
 
 impl FunctionData {
     pub fn new() -> Self {
-        Self { scopes: StackedMap::new() }
-    }
-
-    pub(crate) fn peek(&self) -> usize {
-        self.scopes.len() - 1
+        Self {
+            scopes: StackedMap::new(),
+        }
     }
 }
 
@@ -133,25 +131,14 @@ where
         }
     }
 
-    pub(crate) fn resolve_function_scope(&self, name: NameId) -> usize {
-        self.function_data[&name].peek()
-    }
-
     pub(crate) fn resolve_local(&mut self, fn_name: &NameId, name: &util::Span<NameId>) {
         let data = self.function_data.get_mut(fn_name).unwrap();
 
-        let max_scopes = data.scopes.len();
-
-        for i in (0..max_scopes).rev() {
-            if data.scopes[max_scopes - i - 1].contains_key(&name.item) {
-                if let Some(state) = data.scopes[max_scopes - i - 1].get_mut(&name.item) {
-                    state.state = util::Span::new(State::Read, name.start(), name.end());
-                    state.reads += 1;
-                }
-
-                return; // reduce work done
-            }
-        } // check for ident name in function/local scope
+        if let Some(state) = data.scopes.get_mut(&name.item) {
+            state.state = util::Span::new(State::Read, name.start(), name.end());
+            state.reads += 1;
+            return;
+        } //check for ident name in function/local scope
 
         //  check for external import global level
         // function names when called are stored as
@@ -168,10 +155,12 @@ where
         }
     }
 
-    pub(crate) fn add_local(&mut self, fn_name: NameId, param: util::Span<NameId>) {
-        let scope = self.resolve_function_scope(fn_name);
-
-        if self.function_data[&fn_name].scopes[scope].contains_key(&param.item) {
+    pub(crate) fn add_local(
+        &mut self,
+        fn_name: NameId,
+        param: util::Span<NameId>,
+    ) -> Result<(), ()> {
+        if self.function_data[&fn_name].scopes.is_in_scope(&param.item) {
             let msg = if self.binding_error {
                 format!(
                     "Duplicate binding `{}`",
@@ -186,38 +175,38 @@ where
 
             if self.binding_error {
                 self.reporter
-                    .error(msg, "", (param.start().to_usize(), param.end().to_usize()))
+                    .error(msg, "", (param.start().to_usize(), param.end().to_usize()));
+                return Err(());
             } else {
                 self.reporter
-                    .warn(msg, "", (param.start().to_usize(), param.end().to_usize()))
+                    .warn(msg, "", (param.start().to_usize(), param.end().to_usize()));
             }
         }
 
         let function_data = self.function_data.get_mut(&fn_name).unwrap();
-        function_data.scopes[scope].insert(
+        function_data.scopes.insert(
             param.item,
             LocalData {
                 state: util::Span::new(State::Declared, param.start(), param.end()),
                 reads: 0,
             },
         );
+
+        Ok(())
     }
 
     pub(crate) fn local_is_declared(&self, fn_name: &NameId, name: &util::Span<NameId>) -> bool {
-        let scope = self.resolve_function_scope(*fn_name);
-
-        if let Some(state) = self.function_data[fn_name].scopes[scope].get(&name.item) {
-            return state.state.item == State::Declared;
+        if let Some(state) = self.function_data[fn_name].scopes.get(&name.item) {
+            state.state.item == State::Declared
         } else {
             false
         }
     }
 
     pub(crate) fn define_local(&mut self, fn_name: &NameId, name: &util::Span<NameId>) {
-        let scope = self.resolve_function_scope(*fn_name);
-
         let function_data = self.function_data.get_mut(&fn_name).unwrap();
-        function_data.scopes[scope].insert(
+
+        function_data.scopes.update(
             name.item,
             LocalData {
                 state: util::Span::new(State::Defined, name.start(), name.end()),
@@ -229,29 +218,17 @@ where
     pub(crate) fn begin_function_scope(&mut self, fn_name: NameId) {
         let function_data = self.function_data.get_mut(&fn_name).unwrap();
 
-        function_data.scopes.push(HashMap::new())
+        function_data.scopes.begin_scope();
     }
 
     pub(crate) fn end_function_scope(&mut self, fn_name: NameId) {
         let function_data = self.function_data.get_mut(&fn_name).unwrap();
 
-        println!("{:?}", function_data.scopes);
-
-        let scope = function_data.scopes.pop().unwrap();
-
-        for (name, state) in &scope {
+        for (name, state) in function_data.scopes.end_scope_iter() {
             let LocalData { reads, state } = state;
 
-            println!(
-                "{:?} {:?} {:?} {:?}",
-                name,
-                self.db.lookup_intern_name(*name),
-                reads,
-                state
-            );
-
-            if *reads == 0 || state.item == State::Declared {
-                let msg = format!("Unused variable `{}`", self.db.lookup_intern_name(*name));
+            if reads == 0 || state.item == State::Declared {
+                let msg = format!("Unused variable `{}`", self.db.lookup_intern_name(name));
                 self.reporter
                     .warn(msg, "", (state.start().to_usize(), state.end().to_usize()))
             }
@@ -267,12 +244,12 @@ where
         fn_name: NameId,
         pat_id: &util::Span<PatId>,
         ast_map: &hir::FunctionAstMap,
-    ) {
+    ) -> Result<(), ()> {
         let pat = ast_map.pat(&pat_id.item);
 
         match pat {
             hir::Pattern::Bind { name } => {
-                self.add_local(fn_name, *name);
+                self.add_local(fn_name, *name)?;
                 self.define_local(&fn_name, name);
             }
             hir::Pattern::Tuple(patterns) => {
@@ -281,14 +258,25 @@ where
 
                 self.binding_error = true;
 
+                let mut error_occurred = false;
+
                 for pat in patterns {
-                    self.resolve_pattern(fn_name, pat, ast_map)
+                    if let Err(()) = self.resolve_pattern(fn_name, pat, ast_map) {
+                        error_occurred = true;
+                        continue;
+                    }
                 }
 
                 self.binding_error = false;
+
+                if error_occurred {
+                    return Err(());
+                }
             }
             hir::Pattern::Placeholder | hir::Pattern::Literal(_) => {}
         }
+
+        Ok(())
     }
 
     pub(crate) fn resolve_type(&mut self, id: &util::Span<TypeId>) -> Result<Type, ()> {

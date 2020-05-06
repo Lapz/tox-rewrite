@@ -31,11 +31,10 @@ where
         let mut signature = Vec::new();
 
         self.begin_function_scope(name.item);
-
         for param in &function.params {
             let param = function.ast_map.param(&param.item);
 
-            let _ = self.resolve_pattern(function.name.item, &param.pat, &function.ast_map);
+            self.resolve_pattern(function.name.item, &param.pat, &function.ast_map)?;
 
             signature.push(self.resolve_type(&param.ty)?);
         }
@@ -50,7 +49,7 @@ where
 
         if let Some(body) = &function.body {
             for stmt in body {
-                let _ = self.resolve_statement(&function.name, stmt, &function.ast_map);
+                self.resolve_statement(&function.name, stmt, &function.ast_map)?;
             }
         }
 
@@ -73,7 +72,7 @@ where
         fn_name: &util::Span<NameId>,
         stmt: &StmtId,
         ast_map: &FunctionAstMap,
-    ) {
+    ) -> Result<(), ()> {
         let stmt = ast_map.stmt(stmt);
 
         match stmt {
@@ -83,18 +82,20 @@ where
                 initializer,
                 ascribed_type,
             } => {
-                let _ = self.resolve_pattern(fn_name.item, pat, ast_map);
+                self.resolve_pattern(fn_name.item, pat, ast_map)?;
 
                 if let Some(expr) = initializer {
-                    let _ = self.resolve_expression(fn_name, expr, ast_map);
+                    self.resolve_expression(fn_name, expr, ast_map)?;
                 }
 
                 if let Some(ascribed_type) = ascribed_type {
                     let _ = self.resolve_type(ascribed_type);
                 }
             }
-            crate::hir::Stmt::Expr(expr) => self.resolve_expression(fn_name, expr, ast_map),
+            crate::hir::Stmt::Expr(expr) => self.resolve_expression(fn_name, expr, ast_map)?,
         }
+
+        Ok(())
     }
 }
 
