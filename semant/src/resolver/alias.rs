@@ -35,3 +35,9 @@ where
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::create_test;
+    create_test!(import_alias);
+}

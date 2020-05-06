@@ -99,4 +99,8 @@ where
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use crate::create_test;
+
+    create_test!(import_fn_as_type, is_err);
+}
