@@ -19,7 +19,9 @@ It's built using salsa and rowan and codespan. The design is inspired by rust-an
 - [x] Add resolve imports to ctx
 - [x] Error when a function is used as a type
 - [x] Error on duplicate pattern bindings in the same statement
-- [ ] Warn on unused pattern variable
+- [x] Warn on unused pattern variable
+- [ ] Lower structural and struct methods
+- [ ] Lower enums
 - [ ] Infer types
 - [ ] Resolve external imports
 
