@@ -89,51 +89,10 @@ pub fn resolve_imports_query(
 }
 
 #[cfg(test)]
-#[macro_use]
-mod test {
 
-    macro_rules! create_test {
-        ($filename:ident ,is_err) => {
-            __create_test!($filename, is_err);
-        };
-        ($filename:ident ) => {
-            __create_test!($filename, is_ok);
-        };
-    }
+mod tests {
 
-    macro_rules! __create_test {
-        ($filename:ident,$kind:ident) => {
-            #[test]
-            fn $filename() -> std::io::Result<()> {
-                use crate::HirDatabase;
-                use errors::db::FileDatabase;
-
-                let dir = tempfile::tempdir()?;
-
-                let structure = crate::resolver::tests::load_file(&format!(
-                    "{}/src/resolver/tests/{}.ron",
-                    env!("CARGO_MANIFEST_DIR"),
-                    stringify!($filename)
-                ));
-
-                let mut file_names = Vec::new();
-
-                crate::resolver::tests::create_structure(&dir.path(), &structure, &mut file_names)?;
-
-                let db = crate::resolver::tests::MockDatabaseImpl::default();
-
-                let handle = db.intern_file(file_names.remove(0));
-
-                match db.resolve_source_file(handle) {
-                    Ok(_) => {}
-                    Err(errors) => println!("{:?}", errors),
-                }
-
-                assert!(db.resolve_source_file(handle).$kind());
-                Ok(())
-            }
-        };
-    }
+    use crate::create_test;
 
     create_test!(import_single);
     create_test!(import_many);

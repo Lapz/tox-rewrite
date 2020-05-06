@@ -50,7 +50,7 @@ impl<K: Hash + Eq + Copy + Clone, V: Clone> StackedMap<K, V> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     #[test]
     fn test_it_works() {

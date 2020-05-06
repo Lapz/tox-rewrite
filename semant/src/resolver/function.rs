@@ -79,6 +79,7 @@ where
         match stmt {
             crate::hir::Stmt::Let {
                 pat,
+
                 initializer,
                 ascribed_type,
             } => {
@@ -96,3 +97,6 @@ where
         }
     }
 }
+
+#[cfg(test)]
+mod tests {}
