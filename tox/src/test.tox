@@ -11,11 +11,14 @@ export fn main()  {
     let x =x;
 
     let x:i64 = 19;
-    v=id::<i32>();
+    id::<i32,f32,i32>();
+    v(a)(b);
 
     for(let i=0;i<10;i+=1) {
         print("ok");
     };
+
+    
     if true {print("good")} else {print("bad")};
 }
 

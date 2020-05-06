@@ -54,9 +54,7 @@ pub(crate) struct FunctionData {
 
 impl FunctionData {
     pub fn new() -> Self {
-        Self {
-            scopes: vec![HashMap::new()],
-        }
+        Self { scopes: vec![] }
     }
 
     pub(crate) fn peek(&self) -> usize {
@@ -236,6 +234,8 @@ where
 
     pub(crate) fn end_function_scope(&mut self, fn_name: NameId) {
         let function_data = self.function_data.get_mut(&fn_name).unwrap();
+
+        println!("{:?}", function_data.scopes);
 
         let scope = function_data.scopes.pop().unwrap();
 

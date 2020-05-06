@@ -46,10 +46,46 @@ where
             } => {
                 self.resolve_expression(fn_name, callee, ast_map);
 
+                match ast_map.expr(callee) {
+                    Expr::Ident(ident) => {
+                        if let Some(ty) = self.ctx.get_type(&ident.item) {
+                            match ty {
+                                crate::infer::Type::Poly(ref ty_vars, _) => {
+                                    if type_args.item.len() != ty_vars.len() {
+                                        let msg = format!(
+                                            "Expected `{}` type arguments found `{}`",
+                                            ty_vars.len(),
+                                            type_args.item.len()
+                                        );
+
+                                        let info = if type_args.item.len() > ty_vars.len() {
+                                            "Too many type arguments supplied, try removing some"
+                                        } else {
+                                            "Too few type arguments supplied, try adding some more"
+                                        };
+
+                                        self.reporter.error(
+                                            msg,
+                                            info,
+                                            (
+                                                type_args.start().to_usize(),
+                                                type_args.start().to_usize(),
+                                            ),
+                                        )
+                                    }
+                                }
+
+                                _ => (),
+                            }
+                        }
+                    }
+                    e => println!("{:?}", e),
+                };
+
                 args.iter()
                     .for_each(|id| self.resolve_expression(fn_name, id, ast_map));
 
-                type_args.iter().for_each(|ty| {
+                type_args.item.iter().for_each(|ty| {
                     let _ = self.resolve_type(ty);
                 })
             }
