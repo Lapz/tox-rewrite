@@ -40,6 +40,12 @@ pub enum State {
     Defined,
     Read,
 }
+
+pub enum ItemKind {
+    Class,
+    Function,
+    Enum,
+}
 /// Information at a local variable declared in a block
 #[derive(Copy, Debug, Clone, PartialEq, Eq)]
 pub struct LocalData {
@@ -96,14 +102,18 @@ where
         kind: TypeKind,
     ) -> Result<(), ()> {
         if self.ctx.get_type(&name_id.item).is_some() {
-            let name = self.db.lookup_intern_name(name_id.item);
+            match kind {
+                TypeKind::Function | TypeKind::Enum => (),
+                _ => {
+                    let name = self.db.lookup_intern_name(name_id.item);
 
-            self.reporter.error(
-                format!("Type `{}` is defined multiple times", name),
-                "",
-                (name_id.start().to_usize(), name_id.end().to_usize()),
-            );
-
+                    self.reporter.error(
+                        format!("Type `{}` is defined multiple times", name),
+                        "",
+                        (name_id.start().to_usize(), name_id.end().to_usize()),
+                    );
+                }
+            }
             Err(())
         } else {
             self.ctx.insert_type(name_id.item, ty, kind);
@@ -111,7 +121,7 @@ where
         }
     }
 
-    pub(crate) fn add_function(&mut self, name_id: util::Span<NameId>, exported: bool) {
+    pub(crate) fn add_item(&mut self, name_id: util::Span<NameId>, kind: ItemKind, exported: bool) {
         if self.items.contains(&name_id.item) {
             let name = self.db.lookup_intern_name(name_id.item);
 
@@ -127,7 +137,13 @@ where
 
             self.items.insert(name_id.item);
 
-            self.function_data.insert(name_id.item, FunctionData::new());
+            match kind {
+                ItemKind::Function => {
+                    self.function_data.insert(name_id.item, FunctionData::new());
+                }
+                ItemKind::Class => {}
+                ItemKind::Enum => {}
+            }
         }
     }
 
