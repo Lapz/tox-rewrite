@@ -24,13 +24,9 @@ mod foo;
 
 
 
-class Foo {
-    fn new() -> Foo {
-        bar()
-    }
-    fn bar() {
-
-    }
+class Bza {
+    foo:i32;
+    bar:i32;
 }
 
 export fn id<T>(a:T,(x,z):T) -> (T,i32) {

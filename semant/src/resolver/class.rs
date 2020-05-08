@@ -54,29 +54,37 @@ where
             fields.insert(field.item.property.item, ty);
         }
 
-        let mut methods: Vec<Type> = Vec::new();
-
-        self.begin_scope();
+        let mut methods = HashMap::new();
 
         // forward declare methods
 
         for method in &class.methods {
-            self.add_item(method.name, ItemKind::Function, method.exported)
+            self.add_item(method.name, ItemKind::Function, method.exported);
+            methods.insert(method.name.item, self.resolve_function_signature(method)?);
         }
+
+        self.insert_type(
+            &name,
+            Type::Poly(
+                poly_tvs,
+                Box::new(Type::Class {
+                    name: name.item,
+                    fields,
+                    methods,
+                }),
+            ),
+            TypeKind::Class,
+        )?;
 
         for method in &class.methods {
             if let Err(_) = self.resolve_function(method) {
                 continue;
             }
-
-            let ty = self.ctx.get_type(&method.name.item).unwrap();
-
-            methods.push(ty);
-
-            // self.ctx.remove_type();
         }
 
         self.end_scope();
+
+        
 
         Ok(())
     }

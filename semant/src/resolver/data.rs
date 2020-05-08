@@ -23,6 +23,7 @@ pub enum TypeKind {
     Function,
     Alias,
     Enum,
+    Class,
     Type,
 }
 
