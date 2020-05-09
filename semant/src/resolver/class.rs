@@ -2,11 +2,7 @@ use super::{
     data::{ItemKind, ResolverDataCollector},
     TypeKind,
 };
-use crate::{
-    hir::{Class, Function, FunctionAstMap, NameId, StmtId},
-    infer::{Type, TypeCon},
-    util, HirDatabase,
-};
+use crate::{hir::Class, infer::Type, HirDatabase};
 use std::collections::HashMap;
 
 impl<'a, DB> ResolverDataCollector<&'a DB>
@@ -14,8 +10,6 @@ where
     DB: HirDatabase,
 {
     pub fn resolve_class(&mut self, class: &Class) -> Result<(), ()> {
-        let name = class.name;
-
         self.begin_scope();
 
         let mut poly_tvs = Vec::new();
@@ -64,11 +58,11 @@ where
         }
 
         self.insert_type(
-            &name,
+            &class.name,
             Type::Poly(
                 poly_tvs,
                 Box::new(Type::Class {
-                    name: name.item,
+                    name: class.name.item,
                     fields,
                     methods,
                 }),
@@ -83,8 +77,6 @@ where
         }
 
         self.end_scope();
-
-        
 
         Ok(())
     }
