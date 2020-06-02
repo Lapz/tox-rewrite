@@ -1,6 +1,6 @@
 use super::Type;
 use crate::HirDatabase;
 
-pub fn unify_query(db: &impl HirDatabase, lhs: &Type, rhs: &Type) -> Result<(), ()> {
+pub fn _unify_query(_db: &impl HirDatabase, _lhs: &Type, _rhs: &Type) -> Result<(), ()> {
     Ok(())
 }

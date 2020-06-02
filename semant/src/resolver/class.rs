@@ -54,8 +54,20 @@ where
 
         for method in &class.methods {
             self.add_item(method.name, ItemKind::Function, method.exported);
-            methods.insert(method.name.item, self.resolve_function_signature(method)?);
+            if let Ok(sig) = self.resolve_function_signature(method) {
+                methods.insert(method.name.item, sig);
+            } else {
+                continue;
+            }
         }
+
+        for method in &class.methods {
+            if let Err(_) = self.resolve_function(method) {
+                continue;
+            }
+        }
+
+        self.end_scope();
 
         self.insert_type(
             &class.name,
@@ -69,14 +81,6 @@ where
             ),
             TypeKind::Class,
         )?;
-
-        for method in &class.methods {
-            if let Err(_) = self.resolve_function(method) {
-                continue;
-            }
-        }
-
-        self.end_scope();
 
         Ok(())
     }

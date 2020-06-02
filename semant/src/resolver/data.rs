@@ -104,7 +104,7 @@ where
     ) -> Result<(), ()> {
         if self.ctx.get_type(&name_id.item).is_some() {
             match kind {
-                TypeKind::Function | TypeKind::Enum => (),
+                TypeKind::Function | TypeKind::Enum => (), // Error already reported
                 _ => {
                     let name = self.db.lookup_intern_name(name_id.item);
 
@@ -117,6 +117,7 @@ where
             }
             Err(())
         } else {
+            println!("{:?}", kind);
             self.ctx.insert_type(name_id.item, ty, kind);
             Ok(())
         }
