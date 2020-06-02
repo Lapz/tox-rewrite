@@ -85,3 +85,12 @@ where
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::create_test;
+
+    create_test!(basic_class);
+
+    create_test!(exported_class);
+}
