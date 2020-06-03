@@ -741,6 +741,8 @@ impl AstNode for EnumDef {
 
 
 impl traits::NameOwner for EnumDef {}
+impl traits::VisibilityOwner for EnumDef {}
+impl traits::TypeParamsOwner for EnumDef {}
 impl EnumDef {
     pub fn variant_list(&self) -> Option<EnumVariantList> {
         child_opt(self)

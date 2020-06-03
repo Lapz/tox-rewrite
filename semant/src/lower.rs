@@ -3,6 +3,7 @@ mod class;
 mod function;
 mod imports;
 mod module;
+mod enums;
 
 use crate::{db::HirDatabase, hir};
 use errors::{FileId, WithError};

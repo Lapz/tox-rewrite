@@ -216,6 +216,8 @@ Grammar(
         "EnumDef":(
              traits: [
                 "NameOwner",
+                "VisibilityOwner",
+                "TypeParamsOwner"
             ],
             options: [["variant_list","EnumVariantList"]]
         ),
