@@ -69,16 +69,7 @@ impl<'a> Parser<'a> {
         self.expect(T![:]);
         self.parse_type();
 
-        if self.at(T![;]) {
-            self.bump();
-        } else if self.at(T!["}"]) {
-        } else {
-            let msg = format!(
-                "Expected `;` or `}}` but instead found `{}`",
-                self.current_string()
-            );
-            self.error(msg, "");
-        }
+        self.expect(T![;]);
 
         self.finish_node();
     }

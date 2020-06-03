@@ -2,7 +2,7 @@ DirectoryStructure (
     contents: [
         (
             name:"main.tox",
-            text: "class Foo { bar:i32} class Bar {f:Foo}"
+            text: "class Foo { bar:i32;} class Bar { f:Foo;}"
         )
     ]
 )
