@@ -13,7 +13,7 @@ where
 {
     pub fn resolve_function_signature(&mut self, function: &Function) -> Result<Type, ()> {
         let name = function.name;
-      
+
         let mut poly_tvs = Vec::new();
 
         for type_param in &function.type_params {
