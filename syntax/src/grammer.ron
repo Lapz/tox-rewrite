@@ -222,7 +222,7 @@ Grammar(
             options: [["variant_list","EnumVariantList"]]
         ),
         "EnumVariantList": ( collections: [["variants", "EnumVariant"]] ),
-        "EnumVariant": ( traits: ["NameOwner"], options: ["Expr"] ),
+        "EnumVariant": ( traits: ["NameOwner"], options: ["TypeRef"] ),
 
         "ArrayType": ( options: ["TypeRef", "Expr"] ),
         "ParenType": (traits:["TypesOwner"],options: ["TypeRef"],),

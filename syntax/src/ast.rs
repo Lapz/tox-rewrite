@@ -772,7 +772,7 @@ impl AstNode for EnumVariant {
 
 impl traits::NameOwner for EnumVariant {}
 impl EnumVariant {
-    pub fn expr(&self) -> Option<Expr> {
+    pub fn type_ref(&self) -> Option<TypeRef> {
         child_opt(self)
     }
 }

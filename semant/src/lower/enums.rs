@@ -1,47 +1,59 @@
+use crate::impl_collector;
 use crate::{
-    hir::{self, FunctionAstMap},
-    util, HirDatabase,
+    hir::{self, Enum, FunctionAstMap},
+    util, HirDatabase, TextRange,
 };
 
 use std::sync::Arc;
-use syntax::{ast, NameOwner, TypeParamsOwner, VisibilityOwner};
+use syntax::{ast, AstNode, NameOwner, TypeParamsOwner, TypesOwner, VisibilityOwner};
 
 #[derive(Debug)]
 pub(crate) struct EnumDataCollector<DB> {
     db: DB,
     type_param_count: u64,
     type_params: Vec<util::Span<hir::TypeParamId>>,
+    variants: Vec<util::Span<hir::EnumVariant>>,
     ast_map: FunctionAstMap,
 }
+
+impl_collector!(EnumDataCollector);
 
 impl<'a, DB> EnumDataCollector<&'a DB>
 where
     DB: HirDatabase,
 {
-    pub(crate) fn lower_type_param(&mut self, type_param: ast::TypeParam) {
-        let name = self.db.intern_name(type_param.name().unwrap().into());
+    pub fn finish(self, name: util::Span<hir::NameId>, exported: bool, span: TextRange) -> Enum {
+        let variants = self.variants;
+        let ast_map = self.ast_map;
+        let type_params = self.type_params;
 
-        self.add_type_param(
-            &type_param,
-            hir::TypeParam {
-                name: util::Span::from_ast(name, &type_param),
-            },
-        );
+        Enum {
+            exported,
+            name,
+            ast_map,
+            type_params,
+            variants,
+            span,
+        }
     }
 
-    pub fn add_type_param(&mut self, ast_node: &ast::TypeParam, type_param: hir::TypeParam) {
-        let current = self.type_param_count;
+    pub(crate) fn lower_variant(
+        &mut self,
+        variant: ast::EnumVariant,
+    ) -> util::Span<hir::EnumVariant> {
+        let name = self.db.intern_name(variant.name().unwrap().into());
 
-        self.type_param_count += 1;
+        let ty = if let Some(ty_ref) = variant.type_ref() {
+            Some(self.lower_type(ty_ref))
+        } else {
+            None
+        };
 
-        let id = hir::TypeParamId(current);
-
-        self.ast_map.insert_type_param(id, type_param);
-        self.type_params.push(util::Span::from_ast(id, ast_node));
+        util::Span::from_ast(hir::EnumVariant { name, ty }, &variant)
     }
 }
 
-pub(crate) fn lower_enum_query(db: &impl HirDatabase, enum_id: hir::EnumId) -> Arc<()> {
+pub(crate) fn lower_enum_query(db: &impl HirDatabase, enum_id: hir::EnumId) -> Arc<Enum> {
     let enum_ = db.lookup_intern_enum(enum_id);
 
     let name = util::Span::from_ast(
@@ -53,6 +65,7 @@ pub(crate) fn lower_enum_query(db: &impl HirDatabase, enum_id: hir::EnumId) -> A
         db,
         type_param_count: 0,
         type_params: Vec::new(),
+        variants: Vec::new(),
         ast_map: FunctionAstMap::default(),
     };
 
@@ -66,11 +79,12 @@ pub(crate) fn lower_enum_query(db: &impl HirDatabase, enum_id: hir::EnumId) -> A
 
     if let Some(variant_list) = enum_.variant_list() {
         for variant in variant_list.variants() {
-            collector.lower_variant(variant);
+            let v = collector.lower_variant(variant);
+            collector.variants.push(v);
         }
     }
 
     let span = enum_.syntax().text_range();
 
-    Arc::new(())
+    Arc::new(collector.finish(name, exported, span))
 }
