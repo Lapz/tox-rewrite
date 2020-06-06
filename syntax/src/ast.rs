@@ -122,45 +122,46 @@ pub enum SyntaxKind {
     PREFIX_EXPR, // 97
     TUPLE_EXPR, // 98
     IDENT_EXPR, // 99
-    IF_EXPR, // 100
-    WHILE_EXPR, // 101
-    CONDITION, // 102
-    LOOP_EXPR, // 103
-    DO_EXPR, // 104
-    FOR_EXPR, // 105
-    CONTINUE_EXPR, // 106
-    BREAK_EXPR, // 107
-    BLOCK_EXPR, // 108
-    RETURN_EXPR, // 109
-    CLOSURE_EXPR, // 110
-    PAREN_EXPR, // 111
-    MATCH_EXPR, // 112
-    MATCH_ARM_LIST, // 113
-    MATCH_ARM, // 114
-    MATCH_GUARD, // 115
-    CLASS_LIT, // 116
-    NAMED_FIELD_LIST, // 117
-    NAMED_FIELD, // 118
-    ENUM_VARIANT, // 119
-    NAMED_FIELD_DEF_LIST, // 120
-    NAMED_FIELD_DEF, // 121
-    RECORD_LITERAL_FIELD_LIST, // 122
-    RECORD_LITERAL_FIELD, // 123
-    RECORD_LITERAL_EXPR, // 124
-    ENUM_VARIANT_LIST, // 125
-    VISIBILITY, // 126
-    LITERAL, // 127
-    NAME, // 128
-    NAME_REF, // 129
-    LET_STMT, // 130
-    EXPR_STMT, // 131
-    TYPE_PARAM_LIST, // 132
-    TYPE_ARG_LIST, // 133
-    TYPE_PARAM, // 134
-    PARAM_LIST, // 135
-    PARAM, // 136
-    SELF_PARAM, // 137
-    ARG_LIST, // 138
+    ENUM_EXPR, // 100
+    IF_EXPR, // 101
+    WHILE_EXPR, // 102
+    CONDITION, // 103
+    LOOP_EXPR, // 104
+    DO_EXPR, // 105
+    FOR_EXPR, // 106
+    CONTINUE_EXPR, // 107
+    BREAK_EXPR, // 108
+    BLOCK_EXPR, // 109
+    RETURN_EXPR, // 110
+    CLOSURE_EXPR, // 111
+    PAREN_EXPR, // 112
+    MATCH_EXPR, // 113
+    MATCH_ARM_LIST, // 114
+    MATCH_ARM, // 115
+    MATCH_GUARD, // 116
+    CLASS_LIT, // 117
+    NAMED_FIELD_LIST, // 118
+    NAMED_FIELD, // 119
+    ENUM_VARIANT, // 120
+    NAMED_FIELD_DEF_LIST, // 121
+    NAMED_FIELD_DEF, // 122
+    RECORD_LITERAL_FIELD_LIST, // 123
+    RECORD_LITERAL_FIELD, // 124
+    RECORD_LITERAL_EXPR, // 125
+    ENUM_VARIANT_LIST, // 126
+    VISIBILITY, // 127
+    LITERAL, // 128
+    NAME, // 129
+    NAME_REF, // 130
+    LET_STMT, // 131
+    EXPR_STMT, // 132
+    TYPE_PARAM_LIST, // 133
+    TYPE_ARG_LIST, // 134
+    TYPE_PARAM, // 135
+    PARAM_LIST, // 136
+    PARAM, // 137
+    SELF_PARAM, // 138
+    ARG_LIST, // 139
     // Technical kind so that we can cast from u16 safely
     #[doc(hidden)]
     __LAST,
@@ -279,6 +280,7 @@ impl SyntaxKind {
             PREFIX_EXPR => "PREFIX_EXPR",
             TUPLE_EXPR => "TUPLE_EXPR",
             IDENT_EXPR => "IDENT_EXPR",
+            ENUM_EXPR => "ENUM_EXPR",
             IF_EXPR => "IF_EXPR",
             WHILE_EXPR => "WHILE_EXPR",
             CONDITION => "CONDITION",
@@ -745,6 +747,38 @@ impl traits::VisibilityOwner for EnumDef {}
 impl traits::TypeParamsOwner for EnumDef {}
 impl EnumDef {
     pub fn variant_list(&self) -> Option<EnumVariantList> {
+        child_opt(self)
+    }
+}
+
+// EnumExpr
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct EnumExpr {
+    pub(crate) syntax: SyntaxNode,
+}
+
+impl AstNode for EnumExpr {
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            ENUM_EXPR => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) { Some(EnumExpr { syntax }) } else { None }
+    }
+    fn syntax(&self) -> &SyntaxNode { &self.syntax }
+}
+
+
+impl traits::NamedFieldsOwner for EnumExpr {}
+impl EnumExpr {
+    pub fn named_field_list(&self) -> Option<NamedFieldList> {
+        child_opt(self)
+    }
+
+    pub fn expr(&self) -> Option<Expr> {
         child_opt(self)
     }
 }

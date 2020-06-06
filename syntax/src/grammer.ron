@@ -117,6 +117,7 @@ Grammar(
         "PREFIX_EXPR",
         "TUPLE_EXPR",
         "IDENT_EXPR",
+        "ENUM_EXPR",
 
         //stms
         "IF_EXPR",
@@ -293,6 +294,10 @@ Grammar(
         "IdentExpr":(traits: ["NameOwner"]),
         "RecordLiteralExpr": (
             options: ["NamedFieldList"],
+            traits: ["NamedFieldsOwner"]
+        ),
+        "EnumExpr":(
+            options: ["NamedFieldList","Expr"],
             traits: ["NamedFieldsOwner"]
         ),
         "IndexExpr": (),
