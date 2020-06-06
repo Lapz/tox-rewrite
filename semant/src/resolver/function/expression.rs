@@ -120,6 +120,7 @@ where
                     self.resolve_expression(fn_name, &arm.expr, ast_map)?;
                 }
             }
+            Expr::Enum {} => {}
         }
 
         Ok(())

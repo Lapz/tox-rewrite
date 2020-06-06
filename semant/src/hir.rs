@@ -287,6 +287,10 @@ pub enum Expr {
         expr: ExprId,
         arms: Vec<MatchArm>,
     },
+    Enum {
+        segments: Vec<util::Span<Name>>,
+        expr: Option<ExprId>,
+    },
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
