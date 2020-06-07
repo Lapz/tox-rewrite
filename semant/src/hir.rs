@@ -288,7 +288,8 @@ pub enum Expr {
         arms: Vec<MatchArm>,
     },
     Enum {
-        segments: Vec<util::Span<Name>>,
+        def: util::Span<NameId>,
+        variant: util::Span<NameId>,
         expr: Option<ExprId>,
     },
 }

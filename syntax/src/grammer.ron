@@ -297,8 +297,8 @@ Grammar(
             traits: ["NamedFieldsOwner"]
         ),
         "EnumExpr":(
-            options: ["NamedFieldList","Expr"],
-            traits: ["NamedFieldsOwner"]
+            options: ["Expr"],
+            collections: [["segments","IdentExpr"]]
         ),
         "IndexExpr": (),
         "ReturnExpr": (options: ["Expr"]),
@@ -337,6 +337,7 @@ Grammar(
                 "BinExpr",
                 "Literal",
                 "TupleExpr",
+                "EnumExpr"
             ],
         ),
         "Visibility": (),

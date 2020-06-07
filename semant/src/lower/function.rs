@@ -373,6 +373,33 @@ where
 
                 hir::Expr::Tuple(exprs)
             }
+
+            ast::Expr::EnumExpr(ref enum_expr) => {
+                let def = enum_expr.segments().nth(0).unwrap();
+                let variant = enum_expr.segments().nth(1).unwrap();
+
+                let def = util::Span::from_ast(
+                    self.db.intern_name(def.name().unwrap().into()),
+                    &def.name().unwrap(),
+                );
+
+                let variant = util::Span::from_ast(
+                    self.db.intern_name(variant.name().unwrap().into()),
+                    &variant.name().unwrap(),
+                );
+
+                for name in enum_expr.segments() {
+                    println!("{:?}", name.name());
+                }
+
+                let expr = if let Some(expr) = enum_expr.expr() {
+                    Some(self.lower_expr(expr))
+                } else {
+                    None
+                };
+
+                hir::Expr::Enum { def, variant, expr }
+            }
         };
 
         self.add_expr(expr)

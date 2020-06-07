@@ -772,10 +772,9 @@ impl AstNode for EnumExpr {
 }
 
 
-impl traits::NamedFieldsOwner for EnumExpr {}
 impl EnumExpr {
-    pub fn named_field_list(&self) -> Option<NamedFieldList> {
-        child_opt(self)
+    pub fn segments(&self) -> impl Iterator<Item = IdentExpr> {
+        children(self)
     }
 
     pub fn expr(&self) -> Option<Expr> {
@@ -864,6 +863,7 @@ impl EnumVariantList {
             BinExpr(BinExpr),
             Literal(Literal),
             TupleExpr(TupleExpr),
+            EnumExpr(EnumExpr),
     }
         impl From<ArrayExpr> for Expr {
             fn from(n: ArrayExpr) -> Expr { 
@@ -970,10 +970,15 @@ impl EnumVariantList {
                 Expr::TupleExpr(n)
             }
         }
+        impl From<EnumExpr> for Expr {
+            fn from(n: EnumExpr) -> Expr { 
+                Expr::EnumExpr(n)
+            }
+        }
 impl AstNode for Expr {
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-             | ARRAY_EXPR | IDENT_EXPR | PAREN_EXPR | CLOSURE_EXPR | IF_EXPR | FOR_EXPR | WHILE_EXPR | CONTINUE_EXPR | BREAK_EXPR | BLOCK_EXPR | RETURN_EXPR | MATCH_EXPR | RECORD_LITERAL_EXPR | CALL_EXPR | INDEX_EXPR | FIELD_EXPR | CAST_EXPR | PREFIX_EXPR | BIN_EXPR | LITERAL | TUPLE_EXPR => true,
+             | ARRAY_EXPR | IDENT_EXPR | PAREN_EXPR | CLOSURE_EXPR | IF_EXPR | FOR_EXPR | WHILE_EXPR | CONTINUE_EXPR | BREAK_EXPR | BLOCK_EXPR | RETURN_EXPR | MATCH_EXPR | RECORD_LITERAL_EXPR | CALL_EXPR | INDEX_EXPR | FIELD_EXPR | CAST_EXPR | PREFIX_EXPR | BIN_EXPR | LITERAL | TUPLE_EXPR | ENUM_EXPR => true,
             _ => false,
         }
     }
@@ -1000,7 +1005,8 @@ impl AstNode for Expr {
             | PREFIX_EXPR  => Some(Expr::PrefixExpr(PrefixExpr {syntax})), 
             | BIN_EXPR  => Some(Expr::BinExpr(BinExpr {syntax})), 
             | LITERAL  => Some(Expr::Literal(Literal {syntax})), 
-            | TUPLE_EXPR  => Some(Expr::TupleExpr(TupleExpr {syntax})),_ => None
+            | TUPLE_EXPR  => Some(Expr::TupleExpr(TupleExpr {syntax})), 
+            | ENUM_EXPR  => Some(Expr::EnumExpr(EnumExpr {syntax})),_ => None
         }
     }
     fn syntax(&self) -> &SyntaxNode {  
@@ -1026,7 +1032,8 @@ impl AstNode for Expr {
                 Expr::PrefixExpr(kind)  => &kind.syntax, 
                 Expr::BinExpr(kind)  => &kind.syntax, 
                 Expr::Literal(kind)  => &kind.syntax, 
-                Expr::TupleExpr(kind)  => &kind.syntax,}
+                Expr::TupleExpr(kind)  => &kind.syntax, 
+                Expr::EnumExpr(kind)  => &kind.syntax,}
     
     }
 }

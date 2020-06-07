@@ -120,7 +120,28 @@ where
                     self.resolve_expression(fn_name, &arm.expr, ast_map)?;
                 }
             }
-            Expr::Enum {} => {}
+            Expr::Enum { def, variant, expr } => {
+                if let Some(ty) = self.ctx.get_type(&def.item) {
+                    match ty {
+                        crate::infer::Type::Enum(name, variants) => {
+                            // check if variant is in variants.
+                            // if so ok and if not error // unknown variant
+                            // resolve the expr.
+                        }
+                        _ => {
+                            // Error here saying not an enum
+                            return Err(());
+                        }
+                    }
+                } else {
+                    // Error here saying unknown type
+                    return Err(());
+                }
+
+                if let Some(expr) = expr {
+                    self.resolve_expression(fn_name, expr, ast_map)?;
+                }
+            }
         }
 
         Ok(())

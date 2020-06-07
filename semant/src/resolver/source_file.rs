@@ -71,6 +71,12 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
         collector.add_item(function.name, ItemKind::Function, function.exported);
     }
 
+    // collect the top level definitions first so we can
+    // use forward declarations
+    for enum_def in &source_file.enums {
+        collector.add_item(enum_def.name, ItemKind::Enum, enum_def.exported);
+    }
+
     for alias in &source_file.type_alias {
         if let Err(_) = collector.resolve_alias(alias) {
             continue;
@@ -82,7 +88,7 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
             continue;
         }
     }
-
+ 
     for function in &source_file.functions {
         if let Err(_) = collector.resolve_function(function) {
             continue;
