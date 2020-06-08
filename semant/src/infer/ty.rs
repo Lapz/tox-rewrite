@@ -32,7 +32,7 @@ pub enum Type {
     Poly(Vec<TypeVar>, Box<Type>),
     Var(TypeVar),
     Con(TypeCon),
-    Enum(NameId, HashMap<NameId, Variant>),
+    Enum(HashMap<NameId, Variant>),
     Class {
         name: NameId,
         fields: HashMap<NameId, Type>,

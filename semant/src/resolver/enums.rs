@@ -1,13 +1,10 @@
-use super::{
-    data::{ItemKind, ResolverDataCollector},
-    TypeKind,
-};
+use super::{data::ResolverDataCollector, TypeKind};
 use crate::{
     hir::Enum,
     infer::{Type, Variant},
     HirDatabase,
 };
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 impl<'a, DB> ResolverDataCollector<&'a DB>
 where
@@ -57,11 +54,7 @@ where
 
         self.end_scope();
 
-        self.insert_type(
-            &enum_def.name,
-            Type::Enum(enum_def.name.item, variants),
-            TypeKind::Enum,
-        )?;
+        self.insert_type(&enum_def.name, Type::Enum(variants), TypeKind::Enum)?;
 
         Ok(())
     }
@@ -71,7 +64,9 @@ where
 mod tests {
     use crate::create_test;
 
-    create_test!(basic_class);
+    create_test!(basic_enum);
 
-    create_test!(exported_class);
+    create_test!(enum_dup_variant, is_err);
+
+    create_test!(recursive_enum, is_err);
 }

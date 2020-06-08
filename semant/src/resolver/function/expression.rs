@@ -123,18 +123,32 @@ where
             Expr::Enum { def, variant, expr } => {
                 if let Some(ty) = self.ctx.get_type(&def.item) {
                     match ty {
-                        crate::infer::Type::Enum(name, variants) => {
-                            // check if variant is in variants.
-                            // if so ok and if not error // unknown variant
-                            // resolve the expr.
+                        crate::infer::Type::Enum(variants) => {
+                            if variants.get(&variant.item).is_none() {
+                                let msg = format!(
+                                    "Unknown enum variant `{}`",
+                                    self.db.lookup_intern_name(variant.item)
+                                );
+                                self.reporter.error(msg, "", variant.as_reporter_span());
+                                return Err(());
+                            }
                         }
                         _ => {
-                            // Error here saying not an enum
+                            let msg = format!(
+                                "`{}` is not an enum",
+                                self.db.lookup_intern_name(def.item)
+                            );
+
+                            self.reporter.error(msg, "", def.as_reporter_span());
+
                             return Err(());
                         }
                     }
                 } else {
-                    // Error here saying unknown type
+                    let msg = format!("Unknown enum `{}`", self.db.lookup_intern_name(def.item));
+
+                    self.reporter.error(msg, "", def.as_reporter_span());
+
                     return Err(());
                 }
 

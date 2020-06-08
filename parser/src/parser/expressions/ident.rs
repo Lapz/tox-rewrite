@@ -27,7 +27,6 @@ impl PrefixParser for IdentParselet {
             } else {
                 parser.finish_node();
 
-            
                 parser.start_node(IDENT_EXPR);
 
                 parser.start_node(NAME);
@@ -36,7 +35,10 @@ impl PrefixParser for IdentParselet {
                 parser.finish_node();
                 parser.finish_node();
 
-                parser.parse_expression(Precedence::Assignment, Restrictions::default());
+                if !parser.at(T![;]) {
+                    parser.parse_expression(Precedence::Assignment, Restrictions::default());
+                }
+
                 parser.start_node_at(c, ENUM_EXPR);
                 parser.finish_node();
             }
