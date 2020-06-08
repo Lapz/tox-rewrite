@@ -5,6 +5,7 @@ members=[
     "syntax",
     "semant",
     "tools",
+    "tox-wasm",
     "tox",
 ]
 default-members=["tox"]
