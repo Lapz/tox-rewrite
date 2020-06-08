@@ -83,12 +83,18 @@ pub fn resolve_source_file_query(db: &impl HirDatabase, file: FileId) -> WithErr
         };
     }
 
+    for enum_def in &source_file.enums {
+        if let Err(_) = collector.resolve_enum(enum_def) {
+            continue;
+        }
+    }
+
     for class in &source_file.classes {
         if let Err(_) = collector.resolve_class(class) {
             continue;
         }
     }
- 
+
     for function in &source_file.functions {
         if let Err(_) = collector.resolve_function(function) {
             continue;
