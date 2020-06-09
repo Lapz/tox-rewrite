@@ -8,7 +8,6 @@
 //! `.borrowed` functions. Most of the code works with borowed mode, and only
 //! this mode has all AST accessors.
 #![allow(bad_style, missing_docs, unreachable_pub)]
-#![cfg_attr(rustfmt, rustfmt_skip)]
 
 use crate::traits::{AstNode,self,child_opt,children};
 use crate::SyntaxNode;
