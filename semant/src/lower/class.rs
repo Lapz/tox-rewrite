@@ -40,14 +40,15 @@ where
         }
     }
 
-    pub(crate) fn lower_field(&mut self, field: ast::NamedFieldDef) -> Field {
+    pub(crate) fn lower_field(&mut self, field: ast::NamedFieldDef) {
         let property = util::Span::from_ast(
             self.db.intern_name(field.name().unwrap().into()),
             &field.name().unwrap(),
         );
 
         let ty = self.lower_type(field.ascribed_type().unwrap());
-        Field { property, ty }
+        self.fields
+            .push(util::Span::from_ast(Field { property, ty }, &field));
     }
 
     pub fn lower_method(&mut self, lowered_fn: Arc<Function>) {
