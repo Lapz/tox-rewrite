@@ -277,19 +277,11 @@ where
             }
             ast::Expr::ContinueExpr(_) => hir::Expr::Continue,
             ast::Expr::FieldExpr(ref field_expr) => {
-                for ident in syntax::children::<ast::FieldExpr, ast::IdentExpr>(field_expr) {
-                    println!("{:?}", ident.name());
-                }  
+                let mut fields = Vec::new();
 
-                let name = util::Span::from_ast(
-                    self.db
-                        .intern_name(field_expr.ident().unwrap().name().unwrap().into()),
-                    &field_expr.ident().unwrap(),
-                );
+                handle_field_expr(self.db, field_expr, &mut fields);
 
-                let expr = self.lower_expr(field_expr.expr().unwrap());
-
-                hir::Expr::Field { name, expr }
+                hir::Expr::Field { fields }
             }
             ast::Expr::ForExpr(ref for_expr) => {
                 let init = self.lower_stmt(for_expr.init().unwrap());
@@ -425,10 +417,6 @@ where
                     &variant.name().unwrap(),
                 );
 
-                for name in enum_expr.segments() {
-                    println!("{:?}", name.name());
-                }
-
                 let expr = if let Some(expr) = enum_expr.expr() {
                     Some(self.lower_expr(expr))
                 } else {
@@ -501,4 +489,21 @@ pub(crate) fn lower_function_query(
     let name = util::Span::from_ast(db.intern_name(name.unwrap()), &function.name().unwrap());
 
     Arc::new(collector.finish(exported, name, body, returns, span))
+}
+
+fn handle_field_expr(
+    db: &impl HirDatabase,
+    node: &ast::FieldExpr,
+    names: &mut Vec<util::Span<hir::NameId>>,
+) {
+    for ident in syntax::children::<ast::FieldExpr, ast::IdentExpr>(node) {
+        names.push(util::Span::from_ast(
+            db.intern_name(ident.name().unwrap().into()),
+            &ident,
+        ));
+    }
+
+    if let Some(field_expr) = node.field_expr() {
+        handle_field_expr(db, &field_expr, names)
+    }
 }

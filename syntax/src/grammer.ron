@@ -301,7 +301,7 @@ Grammar(
         "IndexExpr": (),
         "ReturnExpr": (options: ["Expr"]),
         "ParenExpr": (options: ["Expr"]),
-        "FieldExpr": (options: ["Expr", ["ident","IdentExpr"]]),
+        "FieldExpr": (options: ["FieldExpr", ["ident","IdentExpr"]]),
         "CastExpr": (options: ["Expr", "TypeRef"]),
         "PrefixExpr": (options: ["Expr"]),
         "BinExpr": (),

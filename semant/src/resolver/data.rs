@@ -117,7 +117,6 @@ where
             }
             Err(())
         } else {
-            println!("{:?}", kind);
             self.ctx.insert_type(name_id.item, ty, kind);
             Ok(())
         }
@@ -148,13 +147,17 @@ where
         }
     }
 
-    pub(crate) fn resolve_local(&mut self, fn_name: &NameId, name: &util::Span<NameId>) {
+    pub(crate) fn resolve_local(
+        &mut self,
+        fn_name: &NameId,
+        name: &util::Span<NameId>,
+    ) -> Result<(), ()> {
         let data = self.function_data.get_mut(fn_name).unwrap();
 
         if let Some(state) = data.scopes.get_mut(&name.item) {
             state.state = util::Span::new(State::Read, name.start(), name.end());
             state.reads += 1;
-            return;
+            return Ok(());
         } //check for ident name in function/local scope
 
         //  check for external import global level
@@ -170,6 +173,8 @@ where
             self.reporter
                 .error(msg, "", (name.start().to_usize(), name.end().to_usize()))
         }
+
+        Err(())
     }
 
     pub(crate) fn add_local(

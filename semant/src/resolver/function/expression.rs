@@ -8,6 +8,54 @@ impl<'a, DB> ResolverDataCollector<&'a DB>
 where
     DB: HirDatabase,
 {
+    // pub(crate) fn resolve_fields<'b>(
+    //     &mut self,
+    //     field: &util::Span<NameId>,
+    //     ty: crate::infer::Type,
+    //     mut fields: impl Iterator<Item = &'b util::Span<NameId>>,
+    // ) -> Result<(), ()> {
+    //     println!("{:?}", ty);
+    //     match ty {
+    //         crate::infer::Type::Poly(_, ref inner) => match &**inner {
+    //             crate::infer::Type::Class {
+    //                 fields: def_fields, ..
+    //             } => {
+    //                 if !def_fields.contains_key(&field.item) {
+    //                     let msg =
+    //                         format!("Unknown field `{}`", self.db.lookup_intern_name(field.item));
+
+    //                     self.reporter.error(msg, "", field.as_reporter_span());
+    //                     return Err(());
+    //                 }
+
+    //                 if let Some(field) = fields.next() {
+    //                     self.resolve_fields(field, def_fields[&field.item].clone(), fields)?;
+    //                 }
+    //             }
+    //             _ => {
+    //                 let msg = format!(
+    //                     "`{}` doesn't have fields",
+    //                     self.db.lookup_intern_name(field.item)
+    //                 );
+
+    //                 self.reporter.error(msg, "", field.as_reporter_span());
+
+    //                 return Err(());
+    //             }
+    //         },
+    //         _ => {
+    //             let msg = format!(
+    //                 "`{}` doesn't have fields",
+    //                 self.db.lookup_intern_name(field.item)
+    //             );
+
+    //             self.reporter.error(msg, "", field.as_reporter_span());
+    //             return Err(());
+    //         }
+    //     }
+
+    //     Ok(())
+    // }
     pub(crate) fn resolve_expression(
         &mut self,
         fn_name: &util::Span<NameId>,
@@ -81,7 +129,7 @@ where
                         .error(msg, "", (name.start().to_usize(), name.end().to_usize()))
                 }
 
-                self.resolve_local(&fn_name.item, name)
+                self.resolve_local(&fn_name.item, name)?
             }
             Expr::Index { base, index } => {
                 self.resolve_expression(fn_name, base, ast_map)?;
@@ -208,10 +256,19 @@ where
                 if let Some(expr) = expr {
                     self.resolve_expression(fn_name, expr, ast_map)?;
                 }
-            },
+            }
 
-            Expr::Field{ name,expr} => {
-                unimplemented!()
+            Expr::Field { fields } => {
+                self.resolve_local(&fn_name.item, &fields[0])?;
+
+                // let ty = self.ctx.get_type(&fields[0].item).unwrap();
+
+                // let mut iter = fields.into_iter();
+
+                // let field = iter.next().unwrap();
+
+                // self.resolve_fields(field, ty, iter)?;
+                // The checking of fields matching up is done during the type checking phase
             }
         }
 
