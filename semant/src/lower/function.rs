@@ -276,7 +276,21 @@ where
                 unimplemented!()
             }
             ast::Expr::ContinueExpr(_) => hir::Expr::Continue,
-            ast::Expr::FieldExpr(ref _field_expr) => unimplemented!(),
+            ast::Expr::FieldExpr(ref field_expr) => {
+                for ident in syntax::children::<ast::FieldExpr, ast::IdentExpr>(field_expr) {
+                    println!("{:?}", ident.name());
+                }  
+
+                let name = util::Span::from_ast(
+                    self.db
+                        .intern_name(field_expr.ident().unwrap().name().unwrap().into()),
+                    &field_expr.ident().unwrap(),
+                );
+
+                let expr = self.lower_expr(field_expr.expr().unwrap());
+
+                hir::Expr::Field { name, expr }
+            }
             ast::Expr::ForExpr(ref for_expr) => {
                 let init = self.lower_stmt(for_expr.init().unwrap());
                 let cond = self.lower_expr(for_expr.cond().unwrap());

@@ -1088,7 +1088,7 @@ impl FieldExpr {
         child_opt(self)
     }
 
-    pub fn name(&self) -> Option<Name> {
+    pub fn ident(&self) -> Option<IdentExpr> {
         child_opt(self)
     }
 }

@@ -55,4 +55,5 @@ export fn id<T>(a:T,(x,z):T) -> (T,i32) {
     };
     
     let x =10;
+    a.b.c;
 }

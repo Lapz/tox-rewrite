@@ -282,6 +282,10 @@ pub enum Expr {
         op: UnaryOp,
         expr: ExprId,
     },
+    Field {
+        name:util::Span<NameId>,
+        expr:ExprId
+    },
     Return(Option<ExprId>),
     Match {
         expr: ExprId,

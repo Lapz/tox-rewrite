@@ -208,6 +208,10 @@ where
                 if let Some(expr) = expr {
                     self.resolve_expression(fn_name, expr, ast_map)?;
                 }
+            },
+
+            Expr::Field{ name,expr} => {
+                unimplemented!()
             }
         }
 
