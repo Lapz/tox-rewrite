@@ -29,6 +29,7 @@ where
         let mut signature = Vec::new();
 
         self.begin_function_scope(name.item);
+        self.begin_function_scope(name.item);
         for param in &function.params {
             let param = function.ast_map.param(&param.item);
 
@@ -55,11 +56,14 @@ where
 
         let signature = self.resolve_function_signature(function)?;
 
-        self.begin_function_scope(name.item);
-
         if let Some(body) = &function.body {
             for stmt in body {
-                self.resolve_statement(&function.name, stmt, &function.ast_map)?;
+                if self
+                    .resolve_statement(&function.name, stmt, &function.ast_map)
+                    .is_err()
+                {
+                    continue;
+                };
             }
         }
 

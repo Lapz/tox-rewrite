@@ -1084,11 +1084,11 @@ impl AstNode for FieldExpr {
 
 
 impl FieldExpr {
-    pub fn expr(&self) -> Option<Expr> {
+    pub fn field_expr(&self) -> Option<FieldExpr> {
         child_opt(self)
     }
 
-    pub fn name(&self) -> Option<Name> {
+    pub fn ident(&self) -> Option<IdentExpr> {
         child_opt(self)
     }
 }

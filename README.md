@@ -24,10 +24,10 @@ It's built using salsa and rowan and codespan. The design is inspired by rust-an
 - [x] Lower enums
 - [x] Resolve enums
 - [x] Resolve external imports
-- [ ] Lower field access
+- [x] Lower field access
 - [ ] Resolve class field access
-- [ ] Lower class literal
-- [ ] Resolve class literal
+- [x] Lower class literal
+- [x] Resolve class literal
 - [ ] Infer types
 
 ## Build

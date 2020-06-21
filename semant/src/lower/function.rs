@@ -276,7 +276,13 @@ where
                 unimplemented!()
             }
             ast::Expr::ContinueExpr(_) => hir::Expr::Continue,
-            ast::Expr::FieldExpr(ref _field_expr) => unimplemented!(),
+            ast::Expr::FieldExpr(ref field_expr) => {
+                let mut fields = Vec::new();
+
+                handle_field_expr(self.db, field_expr, &mut fields);
+
+                hir::Expr::Field { fields }
+            }
             ast::Expr::ForExpr(ref for_expr) => {
                 let init = self.lower_stmt(for_expr.init().unwrap());
                 let cond = self.lower_expr(for_expr.cond().unwrap());
@@ -411,10 +417,6 @@ where
                     &variant.name().unwrap(),
                 );
 
-                for name in enum_expr.segments() {
-                    println!("{:?}", name.name());
-                }
-
                 let expr = if let Some(expr) = enum_expr.expr() {
                     Some(self.lower_expr(expr))
                 } else {
@@ -487,4 +489,21 @@ pub(crate) fn lower_function_query(
     let name = util::Span::from_ast(db.intern_name(name.unwrap()), &function.name().unwrap());
 
     Arc::new(collector.finish(exported, name, body, returns, span))
+}
+
+fn handle_field_expr(
+    db: &impl HirDatabase,
+    node: &ast::FieldExpr,
+    names: &mut Vec<util::Span<hir::NameId>>,
+) {
+    for ident in syntax::children::<ast::FieldExpr, ast::IdentExpr>(node) {
+        names.push(util::Span::from_ast(
+            db.intern_name(ident.name().unwrap().into()),
+            &ident,
+        ));
+    }
+
+    if let Some(field_expr) = node.field_expr() {
+        handle_field_expr(db, &field_expr, names)
+    }
 }

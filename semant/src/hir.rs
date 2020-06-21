@@ -282,6 +282,9 @@ pub enum Expr {
         op: UnaryOp,
         expr: ExprId,
     },
+    Field {
+        fields: Vec<util::Span<NameId>>,
+    },
     Return(Option<ExprId>),
     Match {
         expr: ExprId,
